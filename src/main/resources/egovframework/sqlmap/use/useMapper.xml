@@ -246,41 +246,90 @@
 	</select>
 	
 	
-	<!-- 월별 카테고리별 금액 합계 -->
-	<select id="selectMonthlyAmountByCategory" parameterType="java.util.Map" resultType="java.util.Map">
-		SELECT
-            DATE_FORMAT(h.TRANDATE, '%m')  AS MONTH
-          , c.CATEGORYNM
-          , c.CLASSIFICATION
-          , SUM(h.TRANAMOUNT)              AS AMOUNT
-        FROM ACC_HISTORY h
-        INNER JOIN ACC_CATEGORY c ON h.CATEGORYID = c.CATEGORYID
-        WHERE h.DELYN = 'N'
-          AND DATE_FORMAT(h.TRANDATE, '%Y') = #{YEAR}
-          AND h.USERID = #{USERID}
-        GROUP BY DATE_FORMAT(h.TRANDATE, '%m'), c.CATEGORYNM, c.CLASSIFICATION
-        ORDER BY MONTH, c.CLASSIFICATION DESC, c.CATEGORYNM
+	
+	
+	
+	<!-- 해당 연도 1월 1일 이전 기준, 계좌별 마지막 잔액 합산 -->
+	<select id="selectPrevYearLastBalance" parameterType="java.util.Map" resultType="long">
+	    SELECT SUM(IFNULL(t.TRANAFTAMOUNT, a.INITMONEY)) AS BALANCE
+	    FROM ACC_ACCOUNT a
+	    LEFT JOIN (
+	        SELECT h1.ACCOUNTID, h1.TRANAFTAMOUNT
+	        FROM ACC_HISTORY h1
+	        WHERE h1.DELYN = 'N'
+	          AND h1.USERID = #{USERID}
+	          AND h1.TRANID = (
+	              SELECT h2.TRANID
+	              FROM ACC_HISTORY h2
+	              WHERE h2.DELYN = 'N'
+	                AND h2.USERID = #{USERID}
+	                AND h2.ACCOUNTID = h1.ACCOUNTID
+	                AND h2.TRANDATE &lt; CONCAT(#{YEAR}, '-01-01')
+	              ORDER BY h2.TRANDATE DESC, h2.TRANID DESC
+	              LIMIT 1
+	          )
+	    ) t ON a.ACCOUNTID = t.ACCOUNTID
+	    WHERE a.USERID = #{USERID}
 	</select>
 	
-	<!-- 월별 마지막 잔액 -->
-	 <select id="selectMonthlyLastBalance" parameterType="java.util.Map" resultType="java.util.Map">
-        SELECT
-            DATE_FORMAT(h1.TRANDATE, '%m')  AS MONTH
-          , h1.TRANAFTAMOUNT                AS BALANCE
-        FROM ACC_HISTORY h1
-        WHERE h1.DELYN = 'N'
-          AND DATE_FORMAT(h1.TRANDATE, '%Y') = #{YEAR}
-          AND h1.USERID = #{userId}
-          AND h1.TRANDATE = (
-              SELECT MAX(h2.TRANDATE)
-              FROM ACC_HISTORY h2
-              WHERE h2.DELYN = 'N'
-                AND DATE_FORMAT(h2.TRANDATE, '%Y') = #{YEAR}
-                AND DATE_FORMAT(h2.TRANDATE, '%m') = DATE_FORMAT(h1.TRANDATE, '%m')
-                AND h2.USERID = #{USERID}
-          )
-        GROUP BY DATE_FORMAT(h1.TRANDATE, '%m'), h1.TRANAFTAMOUNT
-        ORDER BY MONTH
-    </select>
+	<!-- 월말 잔액 조회 -->
+	<select id="selectMonthlyLastBalance" parameterType="java.util.Map" resultType="java.util.Map">
+	    SELECT
+	        m.MONTH,
+	        SUM(IFNULL((
+	            SELECT h.TRANAFTAMOUNT
+	            FROM ACC_HISTORY h
+	            WHERE h.DELYN = 'N'
+	              AND h.USERID = #{USERID}
+	              AND h.ACCOUNTID = a.ACCOUNTID
+	              AND DATE_FORMAT(h.TRANDATE, '%Y-%m') &lt;= CONCAT(#{YEAR}, '-', m.MONTH)
+	            ORDER BY h.TRANDATE DESC, h.TRANID DESC
+	            LIMIT 1
+	        ), a.INITMONEY)) AS BALANCE
+	    FROM ACC_ACCOUNT a
+	    JOIN (
+	        SELECT '01' AS MONTH UNION SELECT '02' UNION SELECT '03' UNION SELECT '04'
+	        UNION SELECT '05' UNION SELECT '06' UNION SELECT '07' UNION SELECT '08'
+	        UNION SELECT '09' UNION SELECT '10' UNION SELECT '11' UNION SELECT '12'
+	    ) m ON 1=1
+	    WHERE a.USERID = #{USERID}
+	    GROUP BY m.MONTH
+	    ORDER BY m.MONTH
+	</select>
 	
+	<!-- 월별 카테고리별 금액 -->
+	<select id="selectMonthlyAmountByCategory" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT
+		    DATE_FORMAT(h.TRANDATE, '%m') AS MONTH,
+		    c.CATEGORYNM,
+		    c.CLASSIFICATION,
+		    SUM(h.TRANAMOUNT) AS AMOUNT
+		FROM ACC_HISTORY h
+		INNER JOIN ACC_CATEGORY c ON h.CATEGORYID = c.CATEGORYID AND h.USERID = c.USERID
+		WHERE h.DELYN = 'N'
+		  AND DATE_FORMAT(h.TRANDATE, '%Y') = #{YEAR}
+		  AND h.USERID = #{USERID}
+		GROUP BY DATE_FORMAT(h.TRANDATE, '%m'), c.CATEGORYNM, c.CLASSIFICATION
+		ORDER BY MONTH, c.CLASSIFICATION DESC, c.CATEGORYNM
+	</select>
+	
+	<!-- 카테고리 목록(중복 제거) -->
+	<select id="selectAnnualCategoryList" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT
+		    MIN(CATEGORYID) AS CATEGORYID,
+		    CATEGORYNM,
+		    CLASSIFICATION
+		FROM ACC_CATEGORY
+		WHERE USERID = #{USERID}
+		GROUP BY CATEGORYNM, CLASSIFICATION
+		ORDER BY CLASSIFICATION DESC, MIN(CATEGORYID)
+	</select>
+	
+	<!-- 사용처명으로 카테고리 존재 여부 확인 -->
+	<select id="selectCategoryByUsageNm" parameterType="java.util.Map" resultType="int">
+	    SELECT COUNT(*)
+	    FROM ACC_CATEGORY
+	    WHERE USERID = #{USERID}
+	      AND USAGENM = #{USAGENM}
+	</select>
 </mapper>

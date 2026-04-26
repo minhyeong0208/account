@@ -46,6 +46,7 @@
 			<button type="button" class="toolbar-btn toolbar-btn-primary" onclick="search()">검색</button> 
 		</div>
 		<div>
+			<button type="button" class="toolbar-btn toolbar-btn-outline" onclick="openUploadModal()">엑셀 업로드</button>
 			<button type="button" class="toolbar-btn toolbar-btn-outline" onclick="addRow()">내역 추가</button>
 			<button type="button" class="toolbar-btn toolbar-btn-success" onclick="save()">저장</button>
 			<button type="button" class="toolbar-btn toolbar-btn-danger" onclick="deleteRow()">삭제</button>
@@ -76,6 +77,7 @@
 	<div id="pagination"></div>
 	
 </form>
+
 <script>
 	var pageIndex = 1;
 	var pageSize = 10;
@@ -300,9 +302,9 @@
 	        data: { month: currentMonth },
 	        success: function(res) {
 
-	            $("#income").text(res.income);
-	            $("#expense").text(res.expense);
-	            $("#balance").text(res.lastBalance);
+	        	$("#income").text(formatNumber(res.income));
+	            $("#expense").text(formatNumber(res.expense));
+	            $("#balance").text(formatNumber(res.lastBalance));
 	        }
 	    });
 	};
@@ -467,12 +469,219 @@
 	    renderMonth();
 	};
 	
+	// 숫자 포맷 함수 추가
+	var formatNumber = (num) => {
+	    return Number(num).toLocaleString('ko-KR');
+	};
+	
 	$(document).ready(function() {
 		changeSearchUI();
 		$("#monthLabel").text(currentMonth);
 		loadAccountOptions();
 		loadSummary();
 	});
+	
+	var parsedListTemp = [];
+	
+	// ── 모달 1: 업로드 모달 ──
+	var openUploadModal = function() {
+		if ($('#uploadModal').length === 0) {
+			$('body').append(
+				'<div class="modal-overlay" id="uploadModal">' +
+				'  <div class="modal">' +
+				'    <div class="modal-header">' +
+				'      <h3>거래내역 업로드</h3>' +
+				'      <button class="modal-close" onclick="closeUploadModal()">✕</button>' +
+				'    </div>' +
+				'    <div class="modal-body">' +
+				'      <div class="modal-form-row">' +
+				'        <label>은행 선택</label>' +
+				'        <select id="uploadBank" onchange="loadUploadAccount()">' +
+				'          <option value="">선택하세요</option>' +
+				'          <option value="KM">국민</option>' +
+				'          <option value="SH">신한</option>' +
+				'          <option value="WR">우리</option>' +
+				'        </select>' +
+				'      </div>' +
+	            '      <div class="modal-form-row">' +
+	            '        <label>계좌 선택</label>' +
+	            '        <select id="uploadAccount">' +
+	            '          <option value="">은행을 먼저 선택하세요</option>' +
+	            '        </select>' +
+	            '      </div>' +
+				'      <div class="modal-form-row">' +
+				'        <label>파일 선택</label>' +
+				'        <input type="file" id="uploadFile" accept=".xlsx,.xls">' +
+				'      </div>' +
+				'    </div>' +
+				'    <div class="modal-footer">' +
+				'      <button type="button" class="toolbar-btn toolbar-btn-danger" onclick="closeUploadModal()">취소</button>' +
+				'      <button type="button" class="toolbar-btn toolbar-btn-primary" onclick="uploadExcel()">업로드</button>' +
+				'    </div>' +
+				'  </div>' +
+				'</div>'
+			);
+		}
+		$('#uploadModal').addClass('open');
+	};
+
+	// 은행 선택 시 계좌 목록 로드
+	var loadUploadAccount = function() {
+	    var bank = $('#uploadBank').val();
+	    var opts = '<option value="">계좌를 선택하세요</option>';
+	    if (bank) {
+	        accountList.forEach(function(item) {
+	            if (item.BANKNM === bank) {
+	                opts += '<option value="' + item.ACCOUNTNUM + '">' + item.ACCOUNTNUM + '</option>';
+	            }
+	        });
+	    }
+	    $('#uploadAccount').html(opts);
+	};
+	
+	var closeUploadModal = function() {
+		$('#uploadModal').removeClass('open');
+		$('#uploadBank').val('');
+	    $('#uploadAccount').html('<option value="">은행을 먼저 선택하세요</option>');
+		$('#uploadFile').val('');
+	};
+
+	// ── 모달 2: 미등록 사용처 모달 ──
+	var openUnregModal = function(unregList, parsedList) {
+		parsedListTemp = parsedList;
+
+		if ($('#unregModal').length === 0) {
+			$('body').append(
+				'<div class="modal-overlay" id="unregModal">' +
+				'  <div class="modal modal-lg">' +
+				'    <div class="modal-header">' +
+				'      <h3>미등록 사용처 확인</h3>' +
+				'      <button class="modal-close" onclick="closeUnregModal()">✕</button>' +
+				'    </div>' +
+				'    <div class="modal-body">' +
+				'      <div class="table-card">' +
+				'        <div class="table-scroll">' +
+				'          <table id="unregTbl">' +
+				'            <thead>' +
+				'              <tr>' +
+				'                <th style="text-align:center; padding:8px 10px; width:100px;">사용처명</th>' +
+				'                <th style="text-align:center; padding:8px 10px; width:100px;">카테고리</th>' +
+				'                <th style="text-align:center; padding:8px 10px; width:100px;">입출금 구분</th>' +
+				'              </tr>' +
+				'            </thead>' +
+				'            <tbody id="unregTbody"></tbody>' +
+				'          </table>' +
+				'        </div>' +
+				'      </div>' +
+				'    </div>' +
+				'    <div class="modal-footer">' +
+				'      <button type="button" class="toolbar-btn toolbar-btn-danger" onclick="closeUnregModal()">취소</button>' +
+				'      <button type="button" class="toolbar-btn toolbar-btn-primary" onclick="saveUnregAndUpload()">등록 후 저장</button>' +
+				'    </div>' +
+				'  </div>' +
+				'</div>'
+			);
+		}
+
+		// 미등록 사용처 목록 렌더링 
+		var html = '';
+		unregList.forEach(function(usageNm) {
+			html += '<tr>';
+			html += '  <td style="padding:6px 10px; text-align:center; vertical-align:middle; width:100px;">' + usageNm + '</td>';
+			html += '  <td style="padding:6px 10px; text-align:center; vertical-align:middle; width:100px;"><input type="text" class="unreg-category" placeholder="카테고리명 입력" style="font-family:inherit;font-size:13px;height:30px;padding:0 8px;border:1px solid var(--color-border);border-radius:6px;width:140px;"></td>';
+			html += '  <td style="padding:6px 10px; text-align:center; vertical-align:middle; width:100px;">';
+			html += '    <select class="unreg-classification" style="font-family:inherit;font-size:13px;height:30px;padding:0 8px;border:1px solid var(--color-border);border-radius:6px;">';
+			html += '      <option value="O">출금</option>';
+			html += '      <option value="I">입금</option>';
+			html += '    </select>';
+			html += '  </td>';
+			html += '</tr>';
+		});
+		$('#unregTbody').html(html);
+		$('#unregModal').addClass('open');
+	};
+
+	var closeUnregModal = function() {
+		$('#unregModal').removeClass('open');
+	};
+
+	// ── 엑셀 업로드 ──
+	var uploadExcel = function() {
+		var bank = $('#uploadBank').val();
+		var accountNum = $('#uploadAccount').val();
+		var file = $('#uploadFile')[0].files[0];
+
+		if (!bank) { alert('은행을 선택하세요.'); return; }
+		if (!accountNum) { alert('계좌를 선택하세요.'); return; }
+		if (!file) { alert('파일을 선택하세요.'); return; }
+
+		var formData = new FormData();
+		formData.append('bank', bank);
+		formData.append('accountNum', accountNum);
+		formData.append('file', file);
+		formData.append('month', currentMonth);
+
+		$.ajax({
+			url: '/use/uploadExcel.do',
+			type: 'POST',
+			data: formData,
+			processData: false,
+			contentType: false,
+			success: function(res) {
+				closeUploadModal();
+				if (res.unregList && res.unregList.length > 0) {
+					// 미등록 사용처 있으면 모달 오픈
+					openUnregModal(res.unregList, res.parsedList);
+				} else {
+					// 없으면 바로 저장
+					alert('업로드가 완료되었습니다.');
+					loadList({ month: currentMonth });
+					loadSummary();
+				}
+			},
+			error: function() {
+				alert('업로드 중 오류가 발생했습니다.');
+			}
+		});
+	};
+
+	// ── 미등록 사용처 등록 후 저장 ──
+	var saveUnregAndUpload = function() {
+		var unregList = [];
+		var valid = true;
+
+		$('#unregTbody tr').each(function() {
+			var $row = $(this);
+			var usageNm = $row.find('td:first').text().trim();
+			var categoryNm = $row.find('.unreg-category').val().trim();
+			var classification = $row.find('.unreg-classification').val();
+
+			if (!categoryNm) {
+				alert('카테고리명을 입력해주세요.');
+				valid = false;
+				return false;
+			}
+			unregList.push({ usageNm: usageNm, categoryNm: categoryNm, classification: classification });
+		});
+
+		if (!valid) return;
+
+		$.ajax({
+			url: '/use/saveUnregAndUpload.do',
+			type: 'POST',
+			contentType: 'application/json; charset=utf-8',
+			data: JSON.stringify({ unregList: unregList, parsedList: parsedListTemp }),
+			success: function(res) {
+				closeUnregModal();
+				alert('저장이 완료되었습니다.');
+				loadList({ month: currentMonth });
+				loadSummary();
+			},
+			error: function() {
+				alert('저장 중 오류가 발생했습니다.');
+			}
+		});
+	};
 </script>
 </body>
 </html>

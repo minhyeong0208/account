@@ -13,7 +13,7 @@ public class SvgDAO extends EgovAbstractMapper {
 		return selectList("SvgMapper.selectCategoryList", inputMap);
 	}
 	
-	int insertCategory(Map<String, Object> inputMap) throws Exception {
+	public int insertCategory(Map<String, Object> inputMap) throws Exception {
 		return insert("SvgMapper.insertCategory", inputMap);
 	}
 	

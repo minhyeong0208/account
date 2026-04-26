@@ -108,7 +108,7 @@ public class SvgController {
 
 	    List<Map<String, Object>> list = svgService.selectAccountListPaging(inputMap);
 	    int totalCount = svgService.selectAccountCnt(inputMap);
-	    System.out.println("list="+list);
+
 	    resultMap.put("list", list);
 	    resultMap.put("totalCount", totalCount);
 

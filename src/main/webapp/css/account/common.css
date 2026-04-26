@@ -194,7 +194,7 @@
   /* ── 테이블 ── */
   table {
     width: 100%;
-    min-width: 1020px;
+    min-width: 0;
     border-collapse: collapse;
     font-size: 12.5px;
   }
@@ -484,3 +484,99 @@
     border-bottom-color: var(--color-primary);
     font-weight: 700;
   }
+  
+  /* ── 모달 ── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.4);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: var(--color-white);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  width: 480px;
+  max-width: 95vw;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+.modal-lg { width: 1000px; }
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+.modal-header h3 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+.modal-close {
+  font-size: 18px;
+  color: var(--color-text-sub);
+  cursor: pointer;
+  background: none;
+  border: none;
+  line-height: 1;
+  font-family: inherit;
+}
+.modal-close:hover { color: var(--color-text); }
+
+.modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.modal-form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.modal-form-row label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-sub);
+}
+.modal-form-row select,
+.modal-form-row input[type="file"] {
+  font-family: inherit;
+  font-size: 13px;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 7px;
+  background: var(--color-white);
+  color: var(--color-text);
+  outline: none;
+  width: 100%;
+}
+.modal-form-row select:focus { border-color: var(--color-primary); }
+.modal-form-row input[type="file"] {
+  height: auto;
+  padding: 6px 10px;
+  cursor: pointer;
+}

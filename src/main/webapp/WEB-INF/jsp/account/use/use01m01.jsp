@@ -4,7 +4,7 @@
 <%@ taglib prefix="ui"     uri="http://egovframework.gov/ctl/ui"%>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
 <%@ taglib prefix="fn"     uri="http://java.sun.com/jsp/jstl/functions"%>
-<%@ taglib prefix="fmt"     uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@ taglib prefix="fmt"    uri="http://java.sun.com/jsp/jstl/fmt"%>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
 
 <div class="summary-cards">
@@ -55,13 +55,21 @@
                         <c:otherwise>
                             <tr class="${row.trClass}">
                                 <td>${row.label}</td>
-                                <c:set var="months" value="${['01','02','03','04','05','06','07','08','09','10','11','12']}"/>
                                 <c:forEach var="m" items="${months}">
                                     <td>
                                         <c:set var="amt" value="${row.months[m]}"/>
-                                        <c:if test="${amt != null and amt != 0}">
-                                            <fmt:formatNumber value="${amt}" pattern="#,###"/>
-                                        </c:if>
+                                        <c:choose>
+                                            <c:when test="${row.trClass == 'carry-row' or row.trClass == 'balance-row'}">
+                                                <c:if test="${amt != null}">
+                                                    <fmt:formatNumber value="${amt}" pattern="#,###"/>
+                                                </c:if>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <c:if test="${amt != null and amt != 0}">
+                                                    <fmt:formatNumber value="${amt}" pattern="#,###"/>
+                                                </c:if>
+                                            </c:otherwise>
+                                        </c:choose>
                                     </td>
                                 </c:forEach>
                                 <td class="annual">

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import account.com.service.SessionManager;
 import account.use.service.UseService;
@@ -97,6 +98,22 @@ public class UseController {
 	}
 	
 	/**
+	 * 엑셀 업로드
+	 * @param bank
+	 * @param file
+	 * @param month
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/uploadExcel.do", method = RequestMethod.POST)
+	@ResponseBody
+	public Map<String, Object> uploadExcel(@RequestParam Map<String, Object> inputMap
+		    							 , @RequestParam("file") MultipartFile file) throws Exception {
+	    
+	    return useService.uploadExcel(inputMap, file);
+	}
+	
+	/**
 	 * 연간정리
 	 * @param inputMap
 	 * @param model
@@ -118,15 +135,13 @@ public class UseController {
 	@RequestMapping(value = "/use01m01.do", method = RequestMethod.POST)
     public String selectUse01m01(@RequestParam Map<String, Object> inputMap, Model model) throws Exception {
 		
-//		System.out.println("year="+inputMap.get("year"));
-		
 		Map<String, Object> data = useService.getAnnualData(inputMap);
 		
-		model.addAttribute("rows",        data.get("rows"));
-        model.addAttribute("totalIncome", data.get("totalIncome"));
-        model.addAttribute("totalExpense",data.get("totalExpense"));
-        model.addAttribute("totalBalance",data.get("totalBalance"));
-        model.addAttribute("year",        inputMap.get("YEAR"));
+		model.addAttribute("rows",         data.get("rows"));
+	    model.addAttribute("totalIncome",  data.get("totalIncome"));
+	    model.addAttribute("totalExpense", data.get("totalExpense"));
+	    model.addAttribute("totalBalance", data.get("totalBalance"));
+	    model.addAttribute("months", new String[]{"01","02","03","04","05","06","07","08","09","10","11","12"});
 		
         return "account/use/use01m01";
     }
@@ -140,6 +155,33 @@ public class UseController {
 	 */
 	@RequestMapping(value = "/use01m02.do", method = RequestMethod.POST)
     public String selectUse01m02(@RequestParam Map<String, Object> inputMap, Model model) throws Exception {
-        return "account/use/use01m02";
+		
+		Map<String, Object> data = useService.getAnnualData(inputMap);
+
+		long[] income = (long[]) data.get("incomeByMonth");
+		
+	    model.addAttribute("totalIncome",  data.get("totalIncome"));
+	    model.addAttribute("totalExpense", data.get("totalExpense"));
+	    model.addAttribute("totalBalance", data.get("totalBalance"));
+	    model.addAttribute("incomeByMonth",  data.get("incomeByMonth"));
+	    model.addAttribute("expenseByMonth", data.get("expenseByMonth"));
+
+	    return "account/use/use01m02";
+
     }
+	
+	/**
+	 * 미등록 카테고리 저장
+	 * @param inputMap
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/saveUnregAndUpload.do", method = RequestMethod.POST)
+	@ResponseBody
+	public String saveUnregAndUpload(@RequestBody Map<String, Object> inputMap) throws Exception {
+	    
+		useService.saveUnregAndUpload(inputMap);
+	    
+		return "success";
+	}
 }

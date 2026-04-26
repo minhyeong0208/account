@@ -101,6 +101,29 @@ public class UseDAO extends EgovAbstractMapper {
 		return selectOne("UseMapper.selectLastBalance", inputMap);
 	}
 	
+	
+	
+	
+	/**
+	 * 해당 연도 1월 1일 이전 기준, 계좌별 마지막 잔액 합산
+	 * @param inputMap
+	 * @return
+	 * @throws Exception
+	 */
+	Long selectPrevYearLastBalance(Map<String, Object> inputMap) throws Exception {
+		return selectOne("UseMapper.selectPrevYearLastBalance", inputMap);
+	}
+	
+	/**
+	 * 월말 잔액 조회
+	 * @param inputMap
+	 * @return
+	 * @throws Exception
+	 */
+	List<Map<String, Object>> selectMonthlyLastBalance(Map<String, Object> inputMap) throws Exception {
+		return selectList("UseMapper.selectMonthlyLastBalance", inputMap);
+	}
+	
 	/**
 	 * 월별 카테고리별 금액
 	 * @param inputMap
@@ -112,12 +135,21 @@ public class UseDAO extends EgovAbstractMapper {
 	}
 	
 	/**
-	 * 월별 마지막 잔액
+	 * 카테고리 목록(중복 제거)
 	 * @param inputMap
 	 * @return
 	 * @throws Exception
 	 */
-	List<Map<String, Object>> selectMonthlyLastBalance(Map<String, Object> inputMap) throws Exception {
-		return selectList("UseMapper.selectMonthlyLastBalance", inputMap);
+	List<Map<String, Object>> selectAnnualCategoryList(Map<String, Object> inputMap) throws Exception {
+		return selectList("UseMapper.selectAnnualCategoryList", inputMap);
+	}
+	
+	/**
+	 * 사용처명으로 카테고리 조회
+	 * @param inputMap
+	 * @return
+	 */
+	int selectCategoryByUsageNm(Map<String, Object> inputMap) throws Exception {
+		return selectOne("UseMapper.selectCategoryByUsageNm", inputMap);
 	}
 } 

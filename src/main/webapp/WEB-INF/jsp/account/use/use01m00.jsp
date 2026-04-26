@@ -6,6 +6,7 @@
 <%@ taglib prefix="fn"     uri="http://java.sun.com/jsp/jstl/functions"%>
 <%@ taglib prefix="fmt"     uri="http://java.sun.com/jsp/jstl/fmt"%>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <div class="page-header">
 	<h1>연간 정리</h1>
 	<div class="year-selector">
