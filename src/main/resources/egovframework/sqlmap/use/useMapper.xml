@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="UseMapper">
+	
+	<!-- 입출금내역 조회 -->
+	<select id="selectHistoryList" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT
+			h.ACCOUNTID
+		  , h.USERID
+		  , h.TRANID
+		  , h.TRANTYPE
+		  , h.TRANAMOUNT
+		  , h.TRANAFTAMOUNT
+		  , h.DESCRIPTION
+		  , h.CATEGORYID
+		  , (SELECT CATEGORYNM FROM ACC_CATEGORY WHERE USERID = #{USERID} AND CATEGORYID = h.CATEGORYID) AS CATEGORYNM
+		  , DATE_FORMAT(h.TRANDATE, '%Y-%m-%d') AS TRANDATE
+		  , h.DELYN
+		  , a.ACCOUNTNUM
+		  FROM ACC_HISTORY h
+	INNER JOIN ACC_ACCOUNT a
+		    ON h.ACCOUNTID= a.ACCOUNTID 
+		   AND h.USERID= a.USERID
+		 WHERE h.USERID = #{USERID}
+		 <if test="month != null and month != ''">
+		   AND DATE_FORMAT(h.TRANDATE, '%Y-%m') = #{month}
+		 </if>
+		 <if test="searchValue != null and searchValue != ''">
+		 	<if test="searchKey == 'bankNm'">
+		   AND a.BANKNM LIKE CONCAT('%', #{searchValue}, '%')
+		 	</if>
+		 	<if test="searchKey == 'tranType'">
+		   AND h.TRANTYPE LIKE CONCAT('%', #{searchValue}, '%')
+		 	</if>
+		 	<if test="searchKey == 'description'">
+		   AND h.DESCRIPTION LIKE CONCAT('%', #{searchValue}, '%')
+		 	</if>
+		 	<if test="searchKey == 'categoryId'">
+		   AND h.CATEGORYID LIKE CONCAT('%', #{searchValue}, '%')
+		 	</if>
+		 	<if test="searchKey == 'tranAmount'">
+		   AND h.TRANAMOUNT LIKE CONCAT('%', #{searchValue}, '%')
+		 	</if>
+		 </if>
+	  ORDER BY h.TRANDATE ASC, h.TRANID ASC
+	</select>
+	
+	<!-- 입출금내역 페이징 조회 -->
+	<select id="selectHistoryListPaging" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT
+			h.ACCOUNTID
+		  , h.USERID
+		  , h.TRANID
+		  , h.TRANTYPE
+		  , h.TRANAMOUNT
+		  , h.TRANAFTAMOUNT
+		  , h.DESCRIPTION
+		  , h.CATEGORYID
+		  , (SELECT CATEGORYNM FROM ACC_CATEGORY WHERE USERID = #{USERID} AND CATEGORYID = h.CATEGORYID) AS CATEGORYNM
+		  , DATE_FORMAT(h.TRANDATE, '%Y-%m-%d') AS TRANDATE
+		  , h.DELYN
+		  , a.ACCOUNTNUM
+		  FROM ACC_HISTORY h
+	INNER JOIN ACC_ACCOUNT a
+		    ON h.ACCOUNTID= a.ACCOUNTID 
+		   AND h.USERID= a.USERID
+		 WHERE h.USERID = #{USERID}
+		 <if test="month != null and month != ''">
+		   AND DATE_FORMAT(h.TRANDATE, '%Y-%m') = #{month}
+		 </if>
+		 <if test="searchValue != null and searchValue != ''">
+		 	<if test="searchKey == 'bankNm'">
+		   AND a.BANKNM LIKE CONCAT('%', #{searchValue}, '%')
+		 	</if>
+		 	<if test="searchKey == 'tranType'">
+		   AND h.TRANTYPE LIKE CONCAT('%', #{searchValue}, '%')
+		 	</if>
+		 	<if test="searchKey == 'description'">
+		   AND h.DESCRIPTION LIKE CONCAT('%', #{searchValue}, '%')
+		 	</if>
+		 	<if test="searchKey == 'categoryId'">
+		   AND h.CATEGORYID LIKE CONCAT('%', #{searchValue}, '%')
+		 	</if>
+		 	<if test="searchKey == 'tranAmount'">
+		   AND h.TRANAMOUNT LIKE CONCAT('%', #{searchValue}, '%')
+		 	</if>
+		 </if>
+	  ORDER BY h.TRANDATE ASC, h.TRANID ASC
+	  LIMIT #{offset}, #{limit}
+	</select>
+	
+	<select id="selectHistoryCnt" parameterType="java.util.Map" resultType="int">
+		SELECT
+			COUNT(*) AS CNT
+		  FROM ACC_HISTORY h
+		 INNER JOIN ACC_ACCOUNT a
+		    ON h.ACCOUNTID = a.ACCOUNTID
+		   AND h.USERID = a.USERID
+		 WHERE h.USERID = #{USERID}
+	
+		<if test="month != null and month != ''">
+		    AND DATE_FORMAT(h.TRANDATE, '%Y-%m') = #{month}
+		</if>
+	
+		<if test="searchValue != null and searchValue != ''">
+		  <if test="searchKey == 'bankNm'">
+		    AND a.BANKNM LIKE CONCAT('%', #{searchValue}, '%')
+		  </if>
+	
+		  <if test="searchKey == 'tranType'">
+		    AND h.TRANTYPE LIKE CONCAT('%', #{searchValue}, '%')
+		  </if>
+	
+		  <if test="searchKey == 'description'">
+		    AND h.DESCRIPTION LIKE CONCAT('%', #{searchValue}, '%')
+		  </if>
+	
+		  <if test="searchKey == 'categoryId'">
+		    AND h.CATEGORYID LIKE CONCAT('%', #{searchValue}, '%')
+		  </if>
+	
+		  <if test="searchKey == 'tranAmount'">
+		    AND h.TRANAMOUNT LIKE CONCAT('%', #{searchValue}, '%')
+		  </if>
+		</if>
+	</select>
+	
+	<!-- 입출금내역 추가 -->
+	<insert id="insertHistory" parameterType="java.util.Map">
+		<selectKey keyProperty="TRANID" resultType="long" order="BEFORE">
+	        SELECT COALESCE(MAX(TRANID), 0) + 1 FROM ACC_HISTORY WHERE USERID = #{USERID}
+	    </selectKey>
+		INSERT INTO ACC_HISTORY (
+			ACCOUNTID
+		  , USERID
+	      , TRANID
+		  , TRANTYPE
+		  , TRANAMOUNT
+	      , DESCRIPTION
+		  , CATEGORYID
+		  , TRANDATE
+	 	  , DELYN
+		  , REGID
+		  , REGDATE
+		) VALUES (
+			(SELECT ACCOUNTID FROM ACC_ACCOUNT WHERE USERID = #{USERID} AND ACCOUNTNUM = #{ACCOUNTNUM})
+		  , #{USERID}
+		  , #{TRANID}
+		  , (SELECT CLASSIFICATION FROM ACC_CATEGORY WHERE USERID = #{USERID} AND USAGENM = #{DESCRIPTION})
+		  , #{TRANAMOUNT}
+		  , #{DESCRIPTION}
+		  , (SELECT CATEGORYID FROM ACC_CATEGORY WHERE USERID = #{USERID} AND USAGENM = #{DESCRIPTION})
+		  , #{TRANDATE}
+		  , 'N'
+		  , #{USERID}
+		  , NOW()
+		)
+	</insert>
+	
+	<!-- 입출금내역 수정 -->
+	<update id="updateHistory" parameterType="java.util.Map">
+		UPDATE ACC_HISTORY
+		   SET TRANAMOUNT = #{TRANAMOUNT}
+		     , DESCRIPTION = #{DESCRIPTION}
+		     , ACCOUNTID = #{ACCOUNTID}
+		     , CATEGORYID = (SELECT CATEGORYID FROM ACC_CATEGORY WHERE USERID = #{USERID} AND USAGENM = #{DESCRIPTION})
+		     , TRANDATE = #{TRANDATE}
+		     , TRANTYPE = (SELECT CLASSIFICATION FROM ACC_CATEGORY WHERE USERID = #{USERID} AND USAGENM = #{DESCRIPTION})
+		     , MODID = #{USERID}
+		     , MODDATE = NOW()
+		 WHERE USERID = #{USERID}
+		   AND TRANID = #{TRANID}
+	</update>
+	
+	<!-- 계좌ID 조회 -->
+	<select id="selectAccountId" parameterType="java.util.Map" resultType="long">
+		SELECT 
+			ACCOUNTID
+		  FROM ACC_ACCOUNT
+		 WHERE USERID = #{USERID}
+	       AND ACCOUNTNUM = #{ACCOUNTNUM}
+	</select>
+	
+	<!-- 입출금내역 삭제 -->
+	<delete id="deleteHistory" parameterType="java.util.Map">
+		DELETE FROM ACC_HISTORY
+		      WHERE USERID = #{USERID}
+		        AND TRANID = #{TRANID}
+	</delete>
+	
+	<!-- 입출금내역 내 항목 조회 -->
+	<select id="selectTranCategoryList" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT DISTINCT
+			   h.CATEGORYID
+			 , c.CATEGORYNM
+		FROM ACC_HISTORY h
+   LEFT JOIN ACC_CATEGORY c
+		  ON h.USERID = c.USERID
+		 AND h.CATEGORYID = c.CATEGORYID
+	   WHERE h.USERID = #{USERID}
+		 AND h.CATEGORYID IS NOT NULL
+	ORDER BY h.CATEGORYID
+	</select>
+	
+	<!-- 거래별 계좌 잔액 갱신 -->
+	<update id="updateAfterAmount" parameterType="java.util.Map">
+	    UPDATE ACC_HISTORY
+	       SET TRANAFTAMOUNT = #{TRANAFTAMOUNT}
+	     WHERE USERID = #{USERID}
+	       AND ACCOUNTID = #{ACCOUNTID}
+	       AND TRANID = #{TRANID}
+	</update>
+	
+	<!-- 월 수입, 지출 조회 -->
+	<select id="selectMonthlySummary" parameterType="java.util.Map" resultType="java.util.Map">
+	    SELECT
+	        IFNULL(SUM(CASE WHEN TRANTYPE = 'I' THEN TRANAMOUNT END), 0) AS INCOME,
+	        IFNULL(SUM(CASE WHEN TRANTYPE = 'O' THEN TRANAMOUNT END), 0) AS EXPENSE
+	    FROM ACC_HISTORY
+	    WHERE USERID = #{USERID}
+	      AND DATE_FORMAT(TRANDATE, '%Y-%m') = #{month}
+	      AND DELYN = 'N'
+	</select>
+	
+	<!-- 월 마지막 잔액 조회 -->
+	<select id="selectLastBalance" parameterType="java.util.Map" resultType="long">
+	    SELECT IFNULL(SUM(IFNULL(t.TRANAFTAMOUNT, a.INITMONEY)), 0)
+	    FROM ACC_ACCOUNT a
+	    LEFT JOIN (
+	        SELECT h1.ACCOUNTID, h1.TRANAFTAMOUNT
+	        FROM ACC_HISTORY h1
+	        WHERE h1.USERID = #{USERID}
+	          AND h1.DELYN = 'N'
+	          AND h1.TRANID = (
+	              SELECT h2.TRANID
+	              FROM ACC_HISTORY h2
+	              WHERE h2.ACCOUNTID = h1.ACCOUNTID
+	                AND h2.USERID = #{USERID}
+	                AND h2.DELYN = 'N'
+	                AND h2.TRANDATE &lt;= LAST_DAY(STR_TO_DATE(#{month}, '%Y-%m'))
+	              ORDER BY h2.TRANDATE DESC, h2.TRANID DESC
+	              LIMIT 1
+	          )
+	    ) t ON a.ACCOUNTID = t.ACCOUNTID
+	    WHERE a.USERID = #{USERID}
+	</select>
+	
+	
+	<!-- 월별 카테고리별 금액 합계 -->
+	<select id="selectMonthlyAmountByCategory" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT
+            DATE_FORMAT(h.TRANDATE, '%m')  AS MONTH
+          , c.CATEGORYNM
+          , c.CLASSIFICATION
+          , SUM(h.TRANAMOUNT)              AS AMOUNT
+        FROM ACC_HISTORY h
+        INNER JOIN ACC_CATEGORY c ON h.CATEGORYID = c.CATEGORYID
+        WHERE h.DELYN = 'N'
+          AND DATE_FORMAT(h.TRANDATE, '%Y') = #{YEAR}
+          AND h.USERID = #{USERID}
+        GROUP BY DATE_FORMAT(h.TRANDATE, '%m'), c.CATEGORYNM, c.CLASSIFICATION
+        ORDER BY MONTH, c.CLASSIFICATION DESC, c.CATEGORYNM
+	</select>
+	
+	<!-- 월별 마지막 잔액 -->
+	 <select id="selectMonthlyLastBalance" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT
+            DATE_FORMAT(h1.TRANDATE, '%m')  AS MONTH
+          , h1.TRANAFTAMOUNT                AS BALANCE
+        FROM ACC_HISTORY h1
+        WHERE h1.DELYN = 'N'
+          AND DATE_FORMAT(h1.TRANDATE, '%Y') = #{YEAR}
+          AND h1.USERID = #{userId}
+          AND h1.TRANDATE = (
+              SELECT MAX(h2.TRANDATE)
+              FROM ACC_HISTORY h2
+              WHERE h2.DELYN = 'N'
+                AND DATE_FORMAT(h2.TRANDATE, '%Y') = #{YEAR}
+                AND DATE_FORMAT(h2.TRANDATE, '%m') = DATE_FORMAT(h1.TRANDATE, '%m')
+                AND h2.USERID = #{USERID}
+          )
+        GROUP BY DATE_FORMAT(h1.TRANDATE, '%m'), h1.TRANAFTAMOUNT
+        ORDER BY MONTH
+    </select>
+	
+</mapper>

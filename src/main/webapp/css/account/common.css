@@ -1,0 +1,486 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+  :root {
+    --color-primary: #185FA5;
+    --color-primary-light: #E6F1FB;
+    --color-primary-dark: #0C447C;
+    --color-income: #185FA5;
+    --color-income-bg: #E6F1FB;
+    --color-expense: #A32D2D;
+    --color-expense-bg: #FCEBEB;
+    --color-balance: #3B6D11;
+    --color-balance-bg: #EAF3DE;
+    --color-header-bg: #185FA5;
+    --color-section-bg: #f5f7fa;
+    --color-border: #dee2e6;
+    --color-text: #222;
+    --color-text-sub: #666;
+    --color-bg: #f0f4f8;
+    --color-white: #fff;
+    --radius: 10px;
+    --shadow: 0 2px 12px rgba(24,95,165,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* ── 레이아웃 ── */
+  .layout { display: flex; min-height: 100vh; }
+
+  /* ── 사이드바 ── */
+  .sidebar {
+    width: 200px;
+    background: var(--color-white);
+    border-right: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+  }
+  .sidebar-logo {
+    padding: 20px 16px;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--color-primary);
+    border-bottom: 1px solid var(--color-border);
+    letter-spacing: -0.3px;
+  }
+  .sidebar-section {
+    padding: 14px 16px 4px;
+    font-size: 11px;
+    color: var(--color-text-sub);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .sidebar-menu {
+    list-style: none;
+    padding: 0 8px;
+  }
+  .sidebar-menu li a {
+    display: block;
+    padding: 9px 12px;
+    border-radius: 7px;
+    color: var(--color-text-sub);
+    text-decoration: none;
+    font-size: 13.5px;
+    transition: background 0.15s, color 0.15s;
+  }
+  .sidebar-menu li a:hover { background: var(--color-primary-light); color: var(--color-primary); }
+  .sidebar-menu li.active a {
+    background: var(--color-primary-light);
+    color: var(--color-primary);
+    font-weight: 700;
+  }
+  .sidebar-divider { margin: 8px 16px; border: none; border-top: 1px solid var(--color-border); }
+
+  /* ── 메인 영역 ── */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* ── 헤더 ── */
+  .topbar {
+    background: var(--color-header-bg);
+    color: #fff;
+    padding: 0 24px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .topbar-title { font-size: 15px; font-weight: 700; letter-spacing: -0.2px; }
+  .topbar-user { font-size: 13px; color: rgba(255,255,255,0.8); display: flex; align-items: center; gap: 10px; }
+  .topbar-user span.uid { color: #B5D4F4; }
+  .topbar-user button {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: #fff;
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  /* ── 콘텐츠 ── */
+  .content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+  }
+
+  /* ── 페이지 타이틀 ── */
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .page-header h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--color-text);
+    letter-spacing: -0.4px;
+  }
+  .year-selector {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .year-selector select {
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 5px 10px;
+    border: 1px solid var(--color-border);
+    border-radius: 7px;
+    background: var(--color-white);
+    color: var(--color-primary);
+    cursor: pointer;
+    outline: none;
+  }
+  .year-selector select:focus { border-color: var(--color-primary); }
+
+  /* ── 요약 카드 ── */
+  .summary-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+  .s-card {
+    background: var(--color-white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 16px 20px;
+    border-top: 3px solid transparent;
+  }
+  .s-card.income  { border-top-color: var(--color-income); }
+  .s-card.expense { border-top-color: var(--color-expense); }
+  .s-card.balance { border-top-color: var(--color-balance); }
+  .s-card .s-label {
+    font-size: 12px;
+    color: var(--color-text-sub);
+    margin-bottom: 6px;
+  }
+  .s-card .s-value {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+  .s-card.income  .s-value { color: var(--color-income); }
+  .s-card.expense .s-value { color: var(--color-expense); }
+  .s-card.balance .s-value { color: var(--color-balance); }
+  .s-card .s-sub {
+    font-size: 11px;
+    color: var(--color-text-sub);
+    margin-top: 4px;
+  }
+
+  /* ── 테이블 래퍼 ── */
+  .table-card {
+    background: var(--color-white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .table-scroll { overflow-x: auto; }
+
+  /* ── 테이블 ── */
+  table {
+    width: 100%;
+    min-width: 1020px;
+    border-collapse: collapse;
+    font-size: 12.5px;
+  }
+  th, td {
+    padding: 7px 10px;
+    text-align: right;
+    border-bottom: 1px solid var(--color-border);
+    white-space: nowrap;
+  }
+  td:first-child, th:first-child {
+    text-align: left;
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: var(--color-white);
+    min-width: 110px;
+    max-width: 110px;
+  }
+
+  /* ── 헤더 행 ── */
+  thead tr th {
+    background: var(--color-header-bg);
+    color: #fff;
+    font-weight: 500;
+    font-size: 12px;
+    border-bottom: none;
+    padding: 9px 10px;
+  }
+  thead tr th:first-child { background: var(--color-header-bg); z-index: 3; }
+
+  /* ── 섹션 타이틀 행 ── */
+  tr.section-header td {
+    background: #f0f4f8;
+    color: #555;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--color-border);
+  }
+  tr.section-header td:first-child { background: #f0f4f8; }
+
+  /* ── 서브 행 ── */
+  tr.sub-row td:first-child {
+    padding-left: 22px;
+    color: var(--color-text-sub);
+  }
+  tr.sub-row:hover td { background: #fafbfd; }
+  tr.sub-row:hover td:first-child { background: #fafbfd; }
+
+  /* ── 합계 행 ── */
+  tr.total-income td {
+    background: var(--color-income-bg);
+    color: var(--color-primary-dark);
+    font-weight: 700;
+    border-bottom: 2px solid #b5d4f4;
+  }
+  tr.total-income td:first-child { background: var(--color-income-bg); }
+
+  tr.total-expense td {
+    background: var(--color-expense-bg);
+    color: var(--color-expense);
+    font-weight: 700;
+    border-bottom: 2px solid #f7c1c1;
+  }
+  tr.total-expense td:first-child { background: var(--color-expense-bg); }
+
+  /* ── 전월이월 행 ── */
+  tr.carry-row td {
+    background: #fafafa;
+    color: #888;
+    font-size: 12px;
+    border-bottom: 1px solid var(--color-border);
+  }
+  tr.carry-row td:first-child { background: #fafafa; }
+
+  /* ── 잔액 행 ── */
+  tr.balance-row td {
+    background: var(--color-balance-bg);
+    color: var(--color-balance);
+    font-weight: 700;
+    border-bottom: none;
+  }
+  tr.balance-row td:first-child { background: var(--color-balance-bg); }
+
+  /* ── 연계 컬럼 강조 ── */
+  td.annual, th.annual {
+    background: rgba(24,95,165,0.07);
+    font-weight: 700;
+    color: var(--color-primary-dark);
+    border-left: 1px solid #b5d4f4;
+  }
+  tr.total-income  td.annual { background: #cfe2f6; color: var(--color-primary-dark); }
+  tr.total-expense td.annual { background: #f5c8c8; color: var(--color-expense); }
+  tr.balance-row   td.annual { background: #c3dfa8; color: var(--color-balance); }
+  tr.carry-row     td.annual { background: #f0f0f0; color: #888; }
+  tr.section-header td.annual { background: #e8eef4; }
+
+  /* ── 빈 구분 행 ── */
+  tr.spacer td { height: 8px; border-bottom: none; background: #f8f9fb; }
+  tr.spacer td:first-child { background: #f8f9fb; }
+  
+  
+  
+  
+  /* ==========================================
+   기존 CSS (연간정리와 공유) 에 없는 요소 추가
+   ========================================== */
+
+/* ── 월 네비 버튼 ── */
+.month-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.month-nav button {
+  width: 28px; height: 28px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-white);
+  color: var(--color-text-sub);
+  font-size: 11px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, border-color 0.15s;
+}
+.month-nav button:hover {
+  background: var(--color-primary-light);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+#monthLabel {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text);
+  min-width: 72px;
+  text-align: center;
+  display: inline-block;
+}
+
+/* ── 툴바 (검색 + 버튼 영역) ── */
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  gap: 8px;
+}
+.toolbar-left  { display: flex; align-items: center; gap: 8px; }
+.toolbar-right { display: flex; align-items: center; gap: 8px; }
+
+/* ── 툴바 select / input ── */
+.toolbar-select,
+.toolbar-left select,
+.toolbar-left input[type="text"] {
+  font-family: inherit;
+  font-size: 13px;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 7px;
+  background: var(--color-white);
+  color: var(--color-text);
+  outline: none;
+  cursor: pointer;
+}
+.toolbar-select:focus,
+.toolbar-left select:focus,
+.toolbar-left input[type="text"]:focus {
+  border-color: var(--color-primary);
+}
+
+/* ── 툴바 버튼 ── */
+.toolbar-btn {
+  font-family: inherit;
+  font-size: 13px;
+  height: 32px;
+  padding: 0 16px;
+  border-radius: 7px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s;
+}
+.toolbar-btn-primary { background: var(--color-primary); color: #fff; border: none; }
+.toolbar-btn-primary:hover { background: var(--color-primary-dark); }
+.toolbar-btn-outline  { background: var(--color-white); color: var(--color-primary); border: 1px solid var(--color-primary); }
+.toolbar-btn-outline:hover  { background: var(--color-primary-light); }
+.toolbar-btn-success  { background: var(--color-balance); color: #fff; border: none; }
+.toolbar-btn-success:hover  { background: #2d5509; }
+.toolbar-btn-danger   { background: var(--color-white); color: var(--color-expense); border: 1px solid var(--color-expense); }
+.toolbar-btn-danger:hover   { background: var(--color-expense-bg); }
+
+/* ── 테이블 내 input / select ── */
+.table-scroll tbody input[type="text"],
+.table-scroll tbody input[type="date"],
+.table-scroll tbody select {
+  width: 100%;
+  font-family: inherit;
+  font-size: 12px;
+  height: 26px;
+  padding: 0 6px;
+  border: 1px solid var(--color-border);
+  border-radius: 5px;
+  background: var(--color-white);
+  color: var(--color-text);
+  outline: none;
+}
+.table-scroll tbody input:focus,
+.table-scroll tbody select:focus {
+  border-color: var(--color-primary);
+}
+
+/* ── 체크박스 ── */
+.chk {
+  accent-color: var(--color-primary);
+  width: 14px; height: 14px;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+/* ── 배지 ── */
+.badge { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 4px; font-weight: 500; }
+.badge-income  { background: var(--color-income-bg); color: var(--color-primary-dark); }
+.badge-expense { background: var(--color-expense-bg); color: var(--color-expense); }
+
+/* ── 페이지네이션 ── */
+#pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 14px 0 4px;
+  flex-wrap: wrap;
+}
+#pagination a,
+#pagination strong {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  font-size: 12px;
+  text-decoration: none;
+  font-family: inherit;
+}
+#pagination a {
+  border: 1px solid var(--color-border);
+  background: var(--color-white);
+  color: var(--color-text-sub);
+  transition: background 0.15s;
+}
+#pagination a:hover {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+#pagination strong {
+  background: var(--color-primary);
+  color: #fff;
+  border: 1px solid var(--color-primary);
+  font-weight: 500;
+}
+
+  /* ── 탭 버튼 ── */
+  .tab-header {
+    display: flex;
+    gap: 0;
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--color-border);
+  }
+  .tab-btn {
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 10px 24px;
+    border: none;
+    background: transparent;
+    color: var(--color-text-sub);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .tab-btn:hover { color: var(--color-primary); }
+  .tab-btn.active {
+    color: var(--color-primary);
+    border-bottom-color: var(--color-primary);
+    font-weight: 700;
+  }

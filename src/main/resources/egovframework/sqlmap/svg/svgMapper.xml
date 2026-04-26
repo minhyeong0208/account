@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="SvgMapper">
+
+	<!-- 사용처 항목 조회 -->
+	<select id="selectCategoryList" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT
+			USERID
+		  , CATEGORYID
+		  , USAGENM
+		  , CATEGORYNM
+		  , CATEGORYDETAILNM
+		  , CLASSIFICATION
+		  FROM ACC_CATEGORY
+		 WHERE USERID = #{USERID}
+		 <if test="searchValue != null and searchValue != ''">
+		 	<if test="searchKey == 'usageNm'">
+		 		AND USAGENM LIKE CONCAT('%', #{searchValue}, '%')
+		 	</if>
+		 	<if test="searchKey == 'categoryNm'">
+		 		AND CATEGORYNM LIKE CONCAT('%', #{searchValue}, '%')
+		 	</if>
+		 	<if test="searchKey == 'categoryDetailNm'">
+		 		AND CATEGORYDETAILNM LIKE CONCAT('%', #{searchValue}, '%')
+		 	</if>
+		 </if>
+		 ORDER BY REGDATE DESC
+	</select>
+	
+	<!-- 사용처 항목 추가 -->
+	<insert id="insertCategory" parameterType="java.util.Map">
+		<selectKey keyProperty="CATEGORYID" resultType="long" order="BEFORE">
+	        SELECT COALESCE(MAX(CATEGORYID), 0) + 1 FROM ACC_CATEGORY WHERE USERID = #{USERID}
+	    </selectKey>
+	
+		INSERT INTO ACC_CATEGORY (
+			USERID
+		  , CATEGORYID
+		  , USAGENM
+		  , CATEGORYNM
+		  , CATEGORYDETAILNM
+		  , CLASSIFICATION
+		  , REGID
+		  , REGDATE
+		  , MODID
+		  , MODDATE
+		) VALUES (
+			#{USERID}
+		  , #{CATEGORYID}
+		  , #{USAGENM}
+		  , #{CATEGORYNM}
+		  , #{CATEGORYDETAILNM}
+		  , #{CLASSIFICATION}
+		  , #{REGID}
+		  , NOW()
+		  , null
+		  , null
+		)
+	</insert>
+	
+	<!-- 사용처 항목 수정 -->
+	<update id="updateCategory" parameterType="java.util.Map">
+		UPDATE ACC_CATEGORY
+		   SET USAGENM = #{USAGENM}
+    		 , CATEGORYNM = #{CATEGORYNM}
+             , CATEGORYDETAILNM = #{CATEGORYDETAILNM}
+             , CLASSIFICATION = #{CLASSIFICATION}
+             , MODID = #{USERID}
+             , MODDATE = NOW()
+         WHERE USERID = #{USERID}
+           AND CATEGORYID = #{CATEGORYID}
+	</update>
+	
+	<!-- 사용처 항목 전체 삭제(사용자별) -->
+	<delete id="deleteCategoryAll" parameterType="java.util.Map">
+		DELETE FROM ACC_CATEGORY
+		 WHERE USERID = #{USERID}
+	</delete>
+	
+	<!-- 선택 사용처 항목 삭제 -->
+	<delete id="deleteCategory" parameterType="java.util.Map">
+		DELETE FROM ACC_CATEGORY
+		 WHERE USERID = #{USERID}
+		   AND CATEGORYID = #{CATEGORYID}
+	</delete>
+	
+	<!-- 계좌 조회 -->
+	<select id="selectAccountListPaging" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT
+			ROW_NUMBER() OVER (ORDER BY BANKNM, ACCOUNTNUM) AS ROWNUM
+		  , USERID
+		  , ACCOUNTID
+		  , BANKNM
+		  , ACCOUNTNUM
+		  , INITMONEY
+		  FROM ACC_ACCOUNT
+		 WHERE USERID = #{USERID}
+		 <if test="searchValue != null and searchValue != ''">
+		 	<if test="searchKey == 'bankNm'">
+		 		AND BANKNM LIKE CONCAT('%', #{searchValue}, '%')
+		 	</if>
+		 	<if test="searchKey == 'accountNum'">
+		 		AND ACCOUNTNUM LIKE CONCAT('%', #{searchValue}, '%')
+		 	</if>
+		 </if>
+		 ORDER BY BANKNM, ACCOUNTNUM
+		 LIMIT #{offset}, #{limit}
+	</select>
+	
+	<!-- 계좌 조회 -->
+	<select id="selectAccountList" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT
+			ROW_NUMBER() OVER (ORDER BY BANKNM, ACCOUNTNUM) AS ROWNUM
+		  , USERID
+		  , ACCOUNTID
+		  , BANKNM
+		  , ACCOUNTNUM
+		  , INITMONEY
+		  FROM ACC_ACCOUNT
+		 WHERE USERID = #{USERID}
+		 <if test="searchValue != null and searchValue != ''">
+		 	<if test="searchKey == 'bankNm'">
+		 		AND BANKNM LIKE CONCAT('%', #{searchValue}, '%')
+		 	</if>
+		 	<if test="searchKey == 'accountNum'">
+		 		AND ACCOUNTNUM LIKE CONCAT('%', #{searchValue}, '%')
+		 	</if>
+		 </if>
+		 ORDER BY BANKNM, ACCOUNTNUM
+	</select>
+	
+	<!-- 계좌 개수 조회 -->
+	<select id="selectAccountCnt" parameterType="java.util.Map" resultType="int">
+		SELECT
+			COUNT(*) AS CNT
+		  FROM ACC_ACCOUNT
+		 WHERE USERID = #{USERID}
+		 <if test="searchValue != null and searchValue != ''">
+		 	<if test="searchKey == 'bankNm'">
+		 		AND BANKNM LIKE CONCAT('%', #{searchValue}, '%')
+		 	</if>
+		 	<if test="searchKey == 'accountNum'">
+		 		AND ACCOUNTNUM LIKE CONCAT('%', #{searchValue}, '%')
+		 	</if>
+		 </if>
+	</select>
+	
+	<!-- 계좌 추가 -->
+	<insert id="insertAccount" parameterType="java.util.Map">
+		<selectKey keyProperty="ACCOUNTID" resultType="long" order="BEFORE">
+	        SELECT COALESCE(MAX(ACCOUNTID), 0) + 1 FROM ACC_ACCOUNT WHERE USERID = #{USERID}
+	    </selectKey>
+		INSERT INTO ACC_ACCOUNT (
+		    USERID
+		  , ACCOUNTID
+		  , BANKNM
+		  , ACCOUNTNUM
+		  , INITMONEY
+		  , REGID
+		  , REGDATE
+		) VALUES (
+			#{USERID}
+		  , #{ACCOUNTID}
+		  , #{BANKNM}
+		  , #{ACCOUNTNUM}
+		  , #{INITMONEY}
+		  , #{REGID}
+		  , NOW()
+		)
+	</insert>
+	
+	<!-- 계좌 수정 -->
+	<update id="updateAccount" parameterType="java.util.Map">
+		UPDATE ACC_ACCOUNT
+		   SET BANKNM = #{BANKNM}
+		     , ACCOUNTNUM = #{ACCOUNTNUM}
+			 , MODID = #{USERID}
+             , MODDATE = NOW()
+         WHERE USERID = #{USERID}
+           AND ACCOUNTID = #{ACCOUNTID}
+	</update>
+	
+	<!-- 계좌 삭제 -->
+	<delete id="deleteAccount" parameterType="java.util.Map">
+		DELETE FROM ACC_ACCOUNT
+		 WHERE USERID = #{USERID}
+		   AND ACCOUNTID = #{ACCOUNTID}
+	</delete>
+
+</mapper>
