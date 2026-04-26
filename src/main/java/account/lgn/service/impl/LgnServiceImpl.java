@@ -28,6 +28,7 @@ public class LgnServiceImpl extends EgovAbstractServiceImpl implements LgnServic
 		if(resMap != null && resMap.get("USERID") != null) {
 			result.put("result", "success");
 			result.put("userid", resMap.get("USERID"));
+			result.put("usernm", resMap.get("USERNM"));
 		} else {
 			result.put("result", "fail");
 		}

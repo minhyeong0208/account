@@ -6,6 +6,7 @@
 	<select id="selectLogin" parameterType="java.util.Map" resultType="java.util.Map">
 		SELECT
 			USERID
+		  , USERNM
 		  FROM ACC_USER
 		 WHERE USERID = #{userid}
 		   AND PASSWD = #{passwd}
