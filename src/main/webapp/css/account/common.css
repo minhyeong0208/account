@@ -390,6 +390,7 @@
 /* ── 테이블 내 input / select ── */
 .table-scroll tbody input[type="text"],
 .table-scroll tbody input[type="date"],
+.table-scroll tbody input[type="time"],
 .table-scroll tbody select {
   width: 100%;
   font-family: inherit;

@@ -43,6 +43,7 @@ public class UseServiceImpl extends EgovAbstractServiceImpl implements UseServic
 	    List<Map<String, Object>> insertList = (List<Map<String, Object>>) inputMap.get("insertList");
 	    List<Map<String, Object>> updateList = (List<Map<String, Object>>) inputMap.get("updateList");
 
+
 	    String userId = (String) SessionManager.getAttribute("USERID");
 
 	    // INSERT

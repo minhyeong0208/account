@@ -50,7 +50,7 @@
     <bean class="org.springframework.web.servlet.view.UrlBasedViewResolver" p:order="1"
 	    p:viewClass="org.springframework.web.servlet.view.JstlView"
 	    p:prefix="/WEB-INF/jsp/" p:suffix=".jsp"/>
-
+	<!-- 
     <bean id="imageRenderer" class="egovframework.example.cmmn.web.EgovImgPaginationRenderer"/>
 
     <bean id="paginationManager" class="org.egovframe.rte.ptl.mvc.tags.ui.pagination.DefaultPaginationManager">
@@ -59,7 +59,7 @@
                 <entry key="image" value-ref="imageRenderer"/>
             </map>
         </property>
-    </bean>
+    </bean> -->
 
     <mvc:view-controller path="/cmmn/validator.do" view-name="cmmn/validator"/>
     

@@ -62,6 +62,7 @@
 						<th style="width:44px; text-align:center;">순번</th>
 						<th style="width:260px; text-align:center;">은행명</th>
 						<th style="width:120px; text-align:center;">거래일자</th>
+						<th style="width:120px; text-align:center;">거래시각</th>
 						<th style="width:72px; text-align:center;">거래유형</th>
 						<th style="text-align:center;">내용</th>
 						<th style="width:90px; text-align:center;">항목</th>
@@ -105,6 +106,7 @@
 		html += "		</select>";
 		html += "	</td>";
 		html += "	<td><input type='date' class='TRANDATE' name='TRANDATE[]'></td>";
+		html += "	<td><input type='time' class='TRANTIME' name='TRANTIME[]' step='1'></td>";
 		html += "	<td></td>";
 		html += "	<td><input type='text' class='DESCRIPTION' name='DESCRIPTION[]'></td>";
 		html += "	<td></td>";
@@ -156,12 +158,13 @@
 			let tranId = $row.find(".TRANID").val();
 			let accountNum = $row.find(".ACCOUNTNUM").val();
 			let tranDate = $row.find(".TRANDATE").val();
+			let tranTime = $row.find(".TRANTIME").val();  // 거래시각 추가
 			let description = $row.find(".DESCRIPTION").val();
 			let tranAmount = $row.find(".TRANAMOUNT").val();
 			
-			if (!accountNum && !tranDate && !description && !tranAmount) return;
+			if (!accountNum && !tranDate && !tranTime && !description && !tranAmount) return;
 			
-			if(!accountNum.trim() || !tranDate.trim() || !description.trim() || !tranAmount.trim()) {
+			if(!accountNum.trim() || !tranDate.trim() || !tranTime.trim() || !description.trim() || !tranAmount.trim()) {
 				alert("빈 행이 존재합니다. 모든 항목을 입력해주세요.");
 				valid = false;
 				return false;
@@ -171,6 +174,7 @@
 				TRANID: tranId,
 				ACCOUNTNUM: accountNum,
 				TRANDATE: tranDate,
+				TRANTIME: tranTime,
 				DESCRIPTION: description,
 				TRANAMOUNT: tranAmount
 			}
@@ -343,6 +347,7 @@
             html += "    </select>";
             html += "  </td>";
             html += "  <td><input type='date' class='TRANDATE' value='" + (item.TRANDATE || "") + "'></td>";
+            html += "  <td><input type='time' class='TRANTIME' name='TRANTIME[]' value='" + (item.TRANTIME || "") + "' step='1'></td>";
             html += "  <td><span class='" +
            			 ((item.TRANTYPE === "O") ? "badge badge-expense" : "badge badge-income") +
             			"'>" +
@@ -648,7 +653,7 @@
 	// ── 미등록 사용처 등록 후 저장 ──
 	var saveUnregAndUpload = function() {
 		var unregList = [];
-		var valid = true;
+		var valid = true; 
 
 		$('#unregTbody tr').each(function() {
 			var $row = $(this);
