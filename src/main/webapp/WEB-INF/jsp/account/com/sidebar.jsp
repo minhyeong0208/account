@@ -10,7 +10,7 @@
 	<div class="sidebar-logo">💰 가계부</div>
 	<div class="sidebar-section">가계부</div>
 	<ul class="sidebar-menu">
-    <li class="active">
+    <li>
       <a href="#" onclick="loadContent('/use/use00m00.do'); return false;">
         <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" style="vertical-align:middle;margin-right:6px;opacity:0.7">
           <rect x="1" y="1" width="6" height="6" rx="1"/>
@@ -79,3 +79,13 @@
   </ul>
 	
 </nav>
+<script>
+$(document).ready(function() {
+	$('.sidebar-menu li a').first().closest('li').addClass('active');
+	
+    $('.sidebar-menu li a').on('click', function() {
+        $('.sidebar-menu li').removeClass('active');
+        $(this).closest('li').addClass('active');
+    });
+});
+</script>
