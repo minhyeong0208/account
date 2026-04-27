@@ -32,27 +32,26 @@ public class ExcelParser {
     }
 
     private static List<Map<String, Object>> parseShinhan(Sheet sheet) {
-        List<Map<String, Object>> list = new ArrayList<>();
+    	List<Map<String, Object>> list = new ArrayList<>();
         for (int i = 7; i <= sheet.getLastRowNum(); i++) {
             Row row = sheet.getRow(i);
             if (row == null) continue;
 
-            String tranDate = getCellValue(row.getCell(0)).replace(".", "-").trim();
-            String outAmt   = getCellValue(row.getCell(1)).replaceAll(",", "").trim();
-            String inAmt    = getCellValue(row.getCell(2)).replaceAll(",", "").trim();
-            String desc     = getCellValue(row.getCell(3)).trim();
+            String tranDate = getCellValue(row.getCell(0)).replace(".", "-").trim();  // 거래일자
+            String tranTime = getCellValue(row.getCell(1)).trim();                    // 거래시간 (추가)
+            String outAmt   = getCellValue(row.getCell(2)).replaceAll(",", "").trim(); // 출금
+            String inAmt    = getCellValue(row.getCell(3)).replaceAll(",", "").trim(); // 입금
+            String desc     = getCellValue(row.getCell(4)).trim();                    // 내용
 
-            boolean hasOut = !outAmt.isEmpty() && !"0".equals(outAmt);
-            boolean hasIn  = !inAmt.isEmpty()  && !"0".equals(inAmt);
-            
             if (desc.isEmpty()) continue;
-            
-            String type   = outAmt.isEmpty() ? "I" : "O";
-            String amount = outAmt.isEmpty() ? inAmt : outAmt;
+
+            String type   = outAmt.isEmpty() || "0".equals(outAmt) ? "I" : "O";
+            String amount = ("O".equals(type)) ? outAmt : inAmt;
             if (amount.isEmpty()) continue;
 
             Map<String, Object> map = new HashMap<>();
             map.put("TRANDATE",    tranDate);
+            map.put("TRANTIME",    tranTime);  // 추가
             map.put("TRANAMOUNT",  amount);
             map.put("DESCRIPTION", desc);
             map.put("TRANTYPE",    type);

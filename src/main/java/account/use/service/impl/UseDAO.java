@@ -152,4 +152,14 @@ public class UseDAO extends EgovAbstractMapper {
 	int selectCategoryByUsageNm(Map<String, Object> inputMap) throws Exception {
 		return selectOne("UseMapper.selectCategoryByUsageNm", inputMap);
 	}
+	
+	/**
+	 * 엑셀 업로드용 입출금내역 추가
+	 * @param inputMap
+	 * @return
+	 * @throws Exception
+	 */
+	int insertHistoryFromExcel(Map<String, Object> inputMap) throws Exception {
+	    return insert("UseMapper.insertHistoryFromExcel", inputMap);
+	}
 } 

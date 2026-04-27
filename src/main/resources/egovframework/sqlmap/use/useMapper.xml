@@ -43,7 +43,7 @@
 		   AND h.TRANAMOUNT LIKE CONCAT('%', #{searchValue}, '%')
 		 	</if>
 		 </if>
-	  ORDER BY h.TRANDATE ASC, h.TRANTIME, h.TRANID ASC
+	  ORDER BY h.TRANDATE ASC, h.TRANTIME ASC, h.TRANID ASC
 	</select>
 	
 	<!-- 입출금내역 페이징 조회 -->
@@ -87,7 +87,7 @@
 		   AND h.TRANAMOUNT LIKE CONCAT('%', #{searchValue}, '%')
 		 	</if>
 		 </if>
-	  ORDER BY h.TRANDATE ASC, h.TRANTIME, h.TRANID ASC
+	  ORDER BY h.TRANDATE ASC, h.TRANTIME ASC, h.TRANID ASC
 	  LIMIT #{offset}, #{limit}
 	</select>
 	
@@ -95,35 +95,35 @@
 		SELECT
 			COUNT(*) AS CNT
 		  FROM ACC_HISTORY h
-		 INNER JOIN ACC_ACCOUNT a
+	INNER JOIN ACC_ACCOUNT a
 		    ON h.ACCOUNTID = a.ACCOUNTID
 		   AND h.USERID = a.USERID
 		 WHERE h.USERID = #{USERID}
 	
 		<if test="month != null and month != ''">
-		    AND DATE_FORMAT(h.TRANDATE, '%Y-%m') = #{month}
+		   AND DATE_FORMAT(h.TRANDATE, '%Y-%m') = #{month}
 		</if>
 	
 		<if test="searchValue != null and searchValue != ''">
-		  <if test="searchKey == 'bankNm'">
-		    AND a.BANKNM LIKE CONCAT('%', #{searchValue}, '%')
-		  </if>
+		  	<if test="searchKey == 'bankNm'">
+		   AND a.BANKNM LIKE CONCAT('%', #{searchValue}, '%')
+		  	</if>
 	
-		  <if test="searchKey == 'tranType'">
-		    AND h.TRANTYPE LIKE CONCAT('%', #{searchValue}, '%')
-		  </if>
+		  	<if test="searchKey == 'tranType'">
+		   AND h.TRANTYPE LIKE CONCAT('%', #{searchValue}, '%')
+		  	</if>
 	
-		  <if test="searchKey == 'description'">
-		    AND h.DESCRIPTION LIKE CONCAT('%', #{searchValue}, '%')
-		  </if>
+		  	<if test="searchKey == 'description'">
+		   AND h.DESCRIPTION LIKE CONCAT('%', #{searchValue}, '%')
+		  	</if>
 	
-		  <if test="searchKey == 'categoryId'">
-		    AND h.CATEGORYID LIKE CONCAT('%', #{searchValue}, '%')
-		  </if>
+		  	<if test="searchKey == 'categoryId'">
+		   AND h.CATEGORYID LIKE CONCAT('%', #{searchValue}, '%')
+		  	</if>
 	
-		  <if test="searchKey == 'tranAmount'">
-		    AND h.TRANAMOUNT LIKE CONCAT('%', #{searchValue}, '%')
-		  </if>
+		  	<if test="searchKey == 'tranAmount'">
+		   AND h.TRANAMOUNT LIKE CONCAT('%', #{searchValue}, '%')
+		  	</if>
 		</if>
 	</select>
 	
@@ -196,15 +196,15 @@
 	<!-- 입출금내역 내 항목 조회 -->
 	<select id="selectTranCategoryList" parameterType="java.util.Map" resultType="java.util.Map">
 		SELECT DISTINCT
-			   h.CATEGORYID
-			 , c.CATEGORYNM
-		FROM ACC_HISTORY h
-   LEFT JOIN ACC_CATEGORY c
-		  ON h.USERID = c.USERID
-		 AND h.CATEGORYID = c.CATEGORYID
-	   WHERE h.USERID = #{USERID}
-		 AND h.CATEGORYID IS NOT NULL
-	ORDER BY h.CATEGORYID
+			h.CATEGORYID
+		  , c.CATEGORYNM
+		  FROM ACC_HISTORY h
+     LEFT JOIN ACC_CATEGORY c
+		    ON h.USERID = c.USERID
+		   AND h.CATEGORYID = c.CATEGORYID
+	     WHERE h.USERID = #{USERID}
+	   	   AND h.CATEGORYID IS NOT NULL
+	  ORDER BY h.CATEGORYID
 	</select>
 	
 	<!-- 거래별 계좌 잔액 갱신 -->
@@ -219,35 +219,38 @@
 	<!-- 월 수입, 지출 조회 -->
 	<select id="selectMonthlySummary" parameterType="java.util.Map" resultType="java.util.Map">
 	    SELECT
-	        IFNULL(SUM(CASE WHEN TRANTYPE = 'I' THEN TRANAMOUNT END), 0) AS INCOME,
-	        IFNULL(SUM(CASE WHEN TRANTYPE = 'O' THEN TRANAMOUNT END), 0) AS EXPENSE
-	    FROM ACC_HISTORY
-	    WHERE USERID = #{USERID}
-	      AND DATE_FORMAT(TRANDATE, '%Y-%m') = #{month}
-	      AND DELYN = 'N'
+	        IFNULL(SUM(CASE WHEN TRANTYPE = 'I' THEN TRANAMOUNT END), 0) AS INCOME
+	      , IFNULL(SUM(CASE WHEN TRANTYPE = 'O' THEN TRANAMOUNT END), 0) AS EXPENSE
+	      FROM ACC_HISTORY
+	     WHERE USERID = #{USERID}
+	       AND DATE_FORMAT(TRANDATE, '%Y-%m') = #{month}
+	       AND DELYN = 'N'
 	</select>
 	
 	<!-- 월 마지막 잔액 조회 -->
 	<select id="selectLastBalance" parameterType="java.util.Map" resultType="long">
-	    SELECT IFNULL(SUM(IFNULL(t.TRANAFTAMOUNT, a.INITMONEY)), 0)
-	    FROM ACC_ACCOUNT a
-	    LEFT JOIN (
-	        SELECT h1.ACCOUNTID, h1.TRANAFTAMOUNT
-	        FROM ACC_HISTORY h1
-	        WHERE h1.USERID = #{USERID}
-	          AND h1.DELYN = 'N'
-	          AND h1.TRANID = (
-	              SELECT h2.TRANID
-	              FROM ACC_HISTORY h2
-	              WHERE h2.ACCOUNTID = h1.ACCOUNTID
-	                AND h2.USERID = #{USERID}
-	                AND h2.DELYN = 'N'
-	                AND h2.TRANDATE &lt;= LAST_DAY(STR_TO_DATE(#{month}, '%Y-%m'))
-	              ORDER BY h2.TRANDATE DESC, h2.TRANID DESC
-	              LIMIT 1
-	          )
-	    ) t ON a.ACCOUNTID = t.ACCOUNTID
-	    WHERE a.USERID = #{USERID}
+	    SELECT 
+	    	IFNULL(SUM(IFNULL(t.TRANAFTAMOUNT, a.INITMONEY)), 0)
+		  FROM ACC_ACCOUNT a
+	 LEFT JOIN (
+		        SELECT 
+		        	h1.ACCOUNTID
+		          , h1.TRANAFTAMOUNT
+		          FROM ACC_HISTORY h1
+		         WHERE h1.USERID = #{USERID}
+		           AND h1.DELYN = 'N'
+		           AND h1.TRANID = (
+					                SELECT h2.TRANID
+					              	  FROM ACC_HISTORY h2
+					              	 WHERE h2.ACCOUNTID = h1.ACCOUNTID
+					                   AND h2.USERID = #{USERID}
+					                   AND h2.DELYN = 'N'
+					                   AND h2.TRANDATE &lt;= LAST_DAY(STR_TO_DATE(#{month}, '%Y-%m'))
+					              ORDER BY h2.TRANDATE DESC, h2.TRANTIME DESC, h2.TRANID DESC
+					              	 LIMIT 1
+		           				   )
+		        ) t ON a.ACCOUNTID = t.ACCOUNTID
+		  WHERE a.USERID = #{USERID}
 	</select>
 	
 	
@@ -256,50 +259,54 @@
 	
 	<!-- 해당 연도 1월 1일 이전 기준, 계좌별 마지막 잔액 합산 -->
 	<select id="selectPrevYearLastBalance" parameterType="java.util.Map" resultType="long">
-	    SELECT SUM(IFNULL(t.TRANAFTAMOUNT, a.INITMONEY)) AS BALANCE
-	    FROM ACC_ACCOUNT a
-	    LEFT JOIN (
-	        SELECT h1.ACCOUNTID, h1.TRANAFTAMOUNT
-	        FROM ACC_HISTORY h1
-	        WHERE h1.DELYN = 'N'
-	          AND h1.USERID = #{USERID}
-	          AND h1.TRANID = (
-	              SELECT h2.TRANID
-	              FROM ACC_HISTORY h2
-	              WHERE h2.DELYN = 'N'
-	                AND h2.USERID = #{USERID}
-	                AND h2.ACCOUNTID = h1.ACCOUNTID
-	                AND h2.TRANDATE &lt; CONCAT(#{YEAR}, '-01-01')
-	              ORDER BY h2.TRANDATE DESC, h2.TRANID DESC
-	              LIMIT 1
-	          )
-	    ) t ON a.ACCOUNTID = t.ACCOUNTID
-	    WHERE a.USERID = #{USERID}
+	    SELECT 
+	    	SUM(IFNULL(t.TRANAFTAMOUNT, a.INITMONEY)) AS BALANCE
+    	  FROM ACC_ACCOUNT a
+     LEFT JOIN (
+		        SELECT 
+		        	h1.ACCOUNTID
+		          , h1.TRANAFTAMOUNT
+		          FROM ACC_HISTORY h1
+		         WHERE h1.DELYN = 'N'
+		           AND h1.USERID = #{USERID}
+		           AND h1.TRANID = (
+					                SELECT 
+					                	h2.TRANID
+					               	  FROM ACC_HISTORY h2
+					                 WHERE h2.DELYN = 'N'
+						               AND h2.USERID = #{USERID}
+						               AND h2.ACCOUNTID = h1.ACCOUNTID
+						               AND h2.TRANDATE &lt; CONCAT(#{YEAR}, '-01-01')
+					              ORDER BY h2.TRANDATE DESC, h2.TRANTIME DESC, h2.TRANID DESC
+					              	 LIMIT 1
+					          	   )
+		       ) t ON a.ACCOUNTID = t.ACCOUNTID
+		 WHERE a.USERID = #{USERID}
 	</select>
 	
 	<!-- 월말 잔액 조회 -->
 	<select id="selectMonthlyLastBalance" parameterType="java.util.Map" resultType="java.util.Map">
-	    SELECT
-	        m.MONTH,
-	        SUM(IFNULL((
-	            SELECT h.TRANAFTAMOUNT
-	            FROM ACC_HISTORY h
-	            WHERE h.DELYN = 'N'
-	              AND h.USERID = #{USERID}
-	              AND h.ACCOUNTID = a.ACCOUNTID
-	              AND DATE_FORMAT(h.TRANDATE, '%Y-%m') &lt;= CONCAT(#{YEAR}, '-', m.MONTH)
-	            ORDER BY h.TRANDATE DESC, h.TRANID DESC
-	            LIMIT 1
-	        ), a.INITMONEY)) AS BALANCE
-	    FROM ACC_ACCOUNT a
-	    JOIN (
-	        SELECT '01' AS MONTH UNION SELECT '02' UNION SELECT '03' UNION SELECT '04'
-	        UNION SELECT '05' UNION SELECT '06' UNION SELECT '07' UNION SELECT '08'
-	        UNION SELECT '09' UNION SELECT '10' UNION SELECT '11' UNION SELECT '12'
-	    ) m ON 1=1
-	    WHERE a.USERID = #{USERID}
-	    GROUP BY m.MONTH
-	    ORDER BY m.MONTH
+	     SELECT
+        	 m.MONTH
+           , SUM(IFNULL((
+			            SELECT h.TRANAFTAMOUNT
+			              FROM ACC_HISTORY h
+			             WHERE h.DELYN = 'N'
+			               AND h.USERID = #{USERID}
+			               AND h.ACCOUNTID = a.ACCOUNTID
+			               AND DATE_FORMAT(h.TRANDATE, '%Y-%m') &lt;= CONCAT(#{YEAR}, '-', m.MONTH)
+			          ORDER BY h.TRANDATE DESC, h.TRANTIME DESC, h.TRANID DESC
+			             LIMIT 1
+			 ), a.INITMONEY)) AS BALANCE
+    	   FROM ACC_ACCOUNT a
+    	   JOIN (
+		        SELECT '01' AS MONTH UNION SELECT '02' UNION SELECT '03' UNION SELECT '04'
+		        UNION SELECT '05' UNION SELECT '06' UNION SELECT '07' UNION SELECT '08'
+		        UNION SELECT '09' UNION SELECT '10' UNION SELECT '11' UNION SELECT '12'
+		    ) m ON 1=1
+    	  WHERE a.USERID = #{USERID}
+       GROUP BY m.MONTH
+       ORDER BY m.MONTH
 	</select>
 	
 	<!-- 월별 카테고리별 금액 -->
@@ -337,4 +344,28 @@
 	    WHERE USERID = #{USERID}
 	      AND USAGENM = #{USAGENM}
 	</select>
+	
+	<!-- 엑셀 업로드용 입출금내역 추가 -->
+	<insert id="insertHistoryFromExcel" parameterType="java.util.Map">
+	    <selectKey keyProperty="TRANID" resultType="long" order="BEFORE">
+	        SELECT COALESCE(MAX(TRANID), 0) + 1 FROM ACC_HISTORY WHERE USERID = #{USERID}
+	    </selectKey>
+	    INSERT INTO ACC_HISTORY (
+	        ACCOUNTID, USERID, TRANID, TRANTYPE, TRANAMOUNT,
+	        DESCRIPTION, CATEGORYID, TRANDATE, TRANTIME, DELYN, REGID, REGDATE
+	    ) VALUES (
+	        (SELECT ACCOUNTID FROM ACC_ACCOUNT WHERE USERID = #{USERID} AND ACCOUNTNUM = #{ACCOUNTNUM})
+	      , #{USERID}
+	      , #{TRANID}
+	      , #{TRANTYPE}
+	      , #{TRANAMOUNT}
+	      , #{DESCRIPTION}
+	      , (SELECT CATEGORYID FROM ACC_CATEGORY WHERE USERID = #{USERID} AND USAGENM = #{DESCRIPTION})
+	      , #{TRANDATE}
+	      , #{TRANTIME}
+	      , 'N'
+	      , #{USERID}
+	      , NOW()
+	    )
+	</insert>
 </mapper>

@@ -395,31 +395,43 @@ public class UseServiceImpl extends EgovAbstractServiceImpl implements UseServic
 
 		String userId = (String) SessionManager.getAttribute("USERID");
 
-	    List<Map<String, Object>> unregList   = (List<Map<String, Object>>) inputMap.get("unregList");
-	    List<Map<String, Object>> parsedList  = (List<Map<String, Object>>) inputMap.get("parsedList");
+	    List<Map<String, Object>> unregList  = (List<Map<String, Object>>) inputMap.get("unregList");
+	    List<Map<String, Object>> parsedList = (List<Map<String, Object>>) inputMap.get("parsedList");
 
-	 // 1. 미등록 사용처 ACC_CATEGORY에 INSERT
+	    // 1. 미등록 사용처 ACC_CATEGORY에 INSERT
 	    if (unregList != null) {
 	        for (Map<String, Object> item : unregList) {
+
+	            // parsedList에서 해당 사용처의 TRANTYPE 찾아서 CLASSIFICATION 자동 결정
+	            String classification = "O";
+	            if (parsedList != null) {
+	                for (Map<String, Object> p : parsedList) {
+	                    if (item.get("usageNm").equals(p.get("DESCRIPTION"))) {
+	                        classification = (String) p.get("TRANTYPE");
+	                        break;
+	                    }
+	                }
+	            }
+
 	            Map<String, Object> paramMap = new HashMap<>();
 	            paramMap.put("USERID",         userId);
 	            paramMap.put("REGID",          userId);
 	            paramMap.put("USAGENM",        item.get("usageNm"));
 	            paramMap.put("CATEGORYNM",     item.get("categoryNm"));
-	            paramMap.put("CLASSIFICATION", item.get("classification"));
+	            paramMap.put("CLASSIFICATION", classification);
 	            svgDAO.insertCategory(paramMap);
 	        }
 	    }
 
-	    // 2. parsedList → ACC_HISTORY INSERT
+	    // 2. parsedList → ACC_HISTORY INSERT (엑셀용 - TRANTYPE 파싱값 사용)
 	    if (parsedList != null) {
 	        for (Map<String, Object> item : parsedList) {
 	            item.put("USERID", userId);
 	            item.put("REGID",  userId);
-	            useDAO.insertHistory(item);
+	            useDAO.insertHistoryFromExcel(item);
 	        }
 	    }
-	    
+
 	    // 3. 잔액 재계산
 	    Map<String, Object> paramMap = new HashMap<>();
 	    paramMap.put("USERID", userId);
