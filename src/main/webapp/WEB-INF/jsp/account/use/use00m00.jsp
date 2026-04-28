@@ -348,12 +348,12 @@
             html += "  </td>";
             html += "  <td><input type='date' class='TRANDATE' value='" + (item.TRANDATE || "") + "'></td>";
             html += "  <td><input type='time' class='TRANTIME' name='TRANTIME[]' value='" + (item.TRANTIME || "") + "' step='1'></td>";
-            html += "  <td><span class='" +
+            html += "  <td style='text-align:center;'><span class='" +
            			 ((item.TRANTYPE === "O") ? "badge badge-expense" : "badge badge-income") +
             			"'>" +
             		 ((item.TRANTYPE === "O") ? "출금" : "입금") +
             			"</span></td>";html += "  <td><input type='text' class='DESCRIPTION' value='" + (item.DESCRIPTION || "") + "'></td>";
-            html += "  <td>" + (item.CATEGORYNM || "") + "</td>";
+            html += "  <td style='text-align:center;'>" + (item.CATEGORYNM || "") + "</td>";
             html += "  <td><input type='text' class='TRANAMOUNT' value='" + (item.TRANAMOUNT || "") + "'></td>";
             html += "  <td>" + item.TRANAFTAMOUNT + "</td>";
             html += "</tr>";

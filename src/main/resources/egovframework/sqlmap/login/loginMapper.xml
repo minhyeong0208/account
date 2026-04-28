@@ -7,9 +7,40 @@
 		SELECT
 			USERID
 		  , USERNM
+		  , PASSWD
 		  FROM ACC_USER
-		 WHERE USERID = #{userid}
-		   AND PASSWD = #{passwd}
+		 WHERE USERID = #{USERID}
 	</select>
+	
+	<!-- 아이디 중복체크 -->
+	<select id="dupCheckId" parameterType="java.util.Map" resultType="int">
+		SELECT
+			COUNT(*)
+		  FROM ACC_USER
+		 WHERE USERID = #{USERID}
+	</select>
+	
+	<!-- 회원가입 -->
+	<insert id="insertUser" parameterType="java.util.Map">
+		INSERT INTO ACC_USER (
+			USERID
+		  , PASSWD
+		  , BIRTHDATE
+		  , USERNM
+		  , PHONENUM
+		  , REGID
+		  , EMAIL
+		  , REGDATE
+		) VALUES (
+			#{USERID}
+		  , #{PASSWD}
+		  , #{BIRTHDATE}
+		  , #{USERNM}
+		  , #{PHONENUM}
+		  , #{USERID}
+		  , #{EMAIL}
+		  , NOW()
+		)
+	</insert>
 	
 </mapper>

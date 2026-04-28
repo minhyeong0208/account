@@ -68,7 +68,7 @@
   <div class="sidebar-section">설정</div>
   <ul class="sidebar-menu">
     <li>
-      <a href="#">
+      <a href="#" onclick="loadContent('/usr/usr00m00.do'); return false;">
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="vertical-align:middle;margin-right:6px;opacity:0.7">
           <circle cx="8" cy="6" r="3"/>
           <path d="M2 14c0-3 2.7-5 6-5s6 2 6 5"/>

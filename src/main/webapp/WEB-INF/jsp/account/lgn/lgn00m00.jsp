@@ -24,16 +24,18 @@
 
   <div class="login-card">
     <div class="card-title">로그인</div>
-
+	<c:if test="${not empty errorMsg}">
+	    <div class="error-msg show">${errorMsg}</div>
+	</c:if>
     <form id="submitLogin" name="submitLogin" method="post" action="/lgn/passLogin.do">
       <div class="form-group">
         <label class="form-label">아이디</label>
-        <input type="text" class="form-input" name="userid" placeholder="아이디를 입력하세요" autocomplete="username"/>
+        <input type="text" class="form-input" name="USERID" placeholder="아이디를 입력하세요" autocomplete="username"/>
       </div>
 
       <div class="form-group">
         <label class="form-label">비밀번호</label>
-        <input type="password" class="form-input" name="passwd" placeholder="비밀번호를 입력하세요" autocomplete="current-password"/>
+        <input type="password" class="form-input" name="PASSWD" placeholder="비밀번호를 입력하세요" autocomplete="current-password"/>
       </div>
 
       <div class="form-options">
@@ -41,7 +43,7 @@
           <input type="checkbox" name="rememberMe"/>
           로그인 유지
         </label>
-        <a href="#" class="forgot-link">비밀번호 찾기</a>
+        <a href="#" class="forgot-link">비밀번호 재설정</a>
       </div>
 
       <button type="submit" class="btn-login">로그인</button>
@@ -49,7 +51,7 @@
 
     <div class="signup-row">
       계정이 없으신가요?
-      <a href="/user/register.do">회원가입</a>
+      <a href="/lgn/register.do">회원가입</a>
     </div>
   </div>
 </div>

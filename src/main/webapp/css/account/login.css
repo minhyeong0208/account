@@ -157,3 +157,72 @@
     margin-left: 4px;
   }
   .signup-row a:hover { text-decoration: underline; }
+  
+
+/* 필수 표시 */
+.required {
+  color: #e74c3c;
+  font-size: 12px;
+}
+
+/* 아이디 + 중복확인 버튼 행 */
+.input-with-btn {
+  display: flex;
+  gap: 8px;
+}
+.input-with-btn .form-input {
+  flex: 1;
+}
+
+.btn-check {
+  flex-shrink: 0;
+  padding: 0 14px;
+  background: #fff;
+  color: #1a5fa8;
+  border: 1px solid #1a5fa8;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+.btn-check:hover {
+  background: #1a5fa8;
+  color: #fff;
+}
+
+/* 필드별 안내 메시지 */
+.field-msg {
+  font-size: 12px;
+  margin-top: 4px;
+  min-height: 16px;
+}
+.field-msg.msg-ok    { color: #27ae60; }
+.field-msg.msg-error { color: #c0392b; }
+
+/* 성공 메시지 */
+.success-msg {
+  background: #f0fff4;
+  border: 1px solid #a8e6bf;
+  border-radius: 6px;
+  color: #27ae60;
+  font-size: 13px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  display: none;
+}
+
+.error-msg {
+    background: #fff5f5;
+    border: 1px solid #ffc0c0;
+    border-radius: 6px;
+    color: #c0392b;
+    font-size: 13px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    display: none;
+}
+.error-msg.show { display: block; }
+  

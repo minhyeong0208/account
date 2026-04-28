@@ -60,9 +60,45 @@ public class ExcelParser {
         return list;
     }
 
-    // 국민, 우리는 나중에 추가
     private static List<Map<String, Object>> parseKookmin(Sheet sheet) {
-        return new ArrayList<>();
+    	List<Map<String, Object>> list = new ArrayList<>();
+    	
+    	for(int i = 5; i <= sheet.getLastRowNum(); i++) {
+    		Row row = sheet.getRow(i);
+    		if (row == null) continue;
+    		
+    		String tranDateTime = getCellValue(row.getCell(0)).trim(); // 거래일시
+    		String outAmt = getCellValue(row.getCell(4)).replaceAll(",", "").trim();  // 출금
+    		String inAmt = getCellValue(row.getCell(5)).replaceAll(",", "").trim();  // 입금
+    		String desc     = getCellValue(row.getCell(2)).trim();                    // 내용
+    		
+    		if (desc.isEmpty()) continue;
+    		
+            String tranDate = "";
+            String tranTime = "";
+            if (tranDateTime.contains(" ")) {
+                String[] parts = tranDateTime.split(" ", 2);
+                tranDate = parts[0].replace(".", "-");
+                tranTime = parts[1];
+            } else {
+                tranDate = tranDateTime.replace(".", "-");
+            }
+            
+            String type   = outAmt.isEmpty() || "0".equals(outAmt) ? "I" : "O";
+            String amount = "O".equals(type) ? outAmt : inAmt;
+            if (amount.isEmpty()) continue;
+
+            Map<String, Object> map = new HashMap<>();
+            map.put("TRANDATE",    tranDate);
+            map.put("TRANTIME",    tranTime);
+            map.put("TRANAMOUNT",  amount);
+            map.put("DESCRIPTION", desc);
+            map.put("TRANTYPE",    type);
+            list.add(map);
+    		
+    	}
+    	
+    	return list;
     }
 
     private static List<Map<String, Object>> parseWoori(Sheet sheet) {
