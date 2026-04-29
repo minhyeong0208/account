@@ -53,33 +53,45 @@
     	}
   	});
 	
-	 $('#btnSavePw').on('click', function () {
-		    var currentPw    = $('#currentPw').val();
-		    var newPw        = $('#newPw').val();
-		    var newPwConfirm = $('#newPwConfirm').val();
+	$('#btnSave').on('click', function () {
+		let currentPw    = $('#curPasswd').val();
+		let newPw        = $('#newPasswd').val();
+		let newPwConfirm = $('#newPasswdConfirm').val();
 
-		    if (!currentPw) { alert("현재 비밀번호를 입력해주세요."); return; }
-		    if (!newPw || newPw.length < 8) { alert("새 비밀번호를 8자 이상 입력해주세요."); return; }
-		    if (newPw !== newPwConfirm) { alert("새 비밀번호가 일치하지 않습니다."); return; }
-		    if (currentPw === newPw) { alert("현재 비밀번호와 동일합니다."); return; }
+		if (!currentPw) { 
+			alert("현재 비밀번호를 입력해주세요."); 
+			return; 
+		}
+		
+	    if (!newPw || newPw.length < 8) { 
+	    	alert("새 비밀번호를 8자 이상 입력해주세요."); 
+	    	return; 
+	    }
+	    
+	    if (newPw !== newPwConfirm) { 
+	    	alert("새 비밀번호가 일치하지 않습니다."); 
+	    	return; 
+	    }
+	    
+	    if (currentPw === newPw) { 
+	    	alert("현재 비밀번호와 동일합니다."); 
+	    	return; 
+	    }
 
-		    $.ajax({
-		      url: '/user/updatePw.do',
-		      type: 'POST',
-		      data: { CURRENT_PW: currentPw, NEW_PW: newPw },
-		      success: function (res) {
-		        if (res == 'success') {
-		          alert("비밀번호가 변경되었습니다.");
-		          $('#currentPw, #newPw, #newPwConfirm').val('');
-		          $('#newPwConfirmMsg').text('').removeClass('msg-ok msg-error');
-		        } else if (res == 'wrong') {
-		          alert("현재 비밀번호가 올바르지 않습니다.");
-		        } else {
-		          alert("변경에 실패했습니다.");
+		$.ajax({
+			url: '/usr/updatePasswd.do',
+		    type: 'POST',
+		    data: { CURPASSWD: currentPw, NEWPASSWD: newPw },
+		    success: function (res) {
+		    	if (res == 'success') {
+		          	alert("비밀번호가 변경되었습니다.");
+		          	$('#curPasswd, #newPasswd, #newPasswdConfirm').val('');
+		          	$('#newPasswdConfirmMsg').text('').removeClass('msg-ok msg-error');
+		        } else if (res == 'fail') {
+		          	alert("현재 비밀번호가 올바르지 않습니다.");
 		        }
-		      }
-		    });
-		  });
-	
+		    }
+		});
+	});
 	
 </script>

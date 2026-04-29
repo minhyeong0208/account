@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import account.com.service.SessionManager;
 import account.usr.service.UsrService;
 
 @Controller
@@ -77,9 +78,20 @@ public class UsrController {
 	@RequestMapping(value = "/usr00m02.do")
 	public String selectUsr00M02(@RequestParam Map<String, Object> inputMap, Model model) throws Exception {
 		
-		
-		
 		return "account/usr/usr00m02";
+	}
+	
+	@RequestMapping(value = "/updatePasswd.do", method = RequestMethod.POST)
+	@ResponseBody
+	public String updatePasswd(@RequestParam Map<String, Object> inputMap) throws Exception {
+		
+		try {
+	        int result = usrService.updatePasswd(inputMap);
+	        return result == 1 ? "success" : "fail";
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return "error";
+	    }
 	}
 	
 	/**
@@ -93,6 +105,23 @@ public class UsrController {
 	public String selectUsr00M03(@RequestParam Map<String, Object> inputMap, Model model) throws Exception {
 		
 		return "account/usr/usr00m03";
+	}
+	
+	@RequestMapping(value = "/deleteUser.do", method = RequestMethod.POST)
+	@ResponseBody
+	public String deleteUser(@RequestParam Map<String, Object> inputMap) throws Exception {
+		
+		try {
+	        int result = usrService.deleteUser(inputMap);
+	        if (result == 1) {
+	        	SessionManager.invalidate();
+	            return "success";
+	        }
+	        return "fail";
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return "error";
+	    }
 	}
 	
 }

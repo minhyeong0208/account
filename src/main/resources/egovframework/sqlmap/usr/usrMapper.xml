@@ -23,4 +23,25 @@
 		     , EMAIL = #{EMAIL}
 		 WHERE USERID = #{USERID}
 	</update>
+	
+	<!-- 현재 비밀번호 조회 -->
+	<select id="selectPasswd" parameterType="java.util.Map" resultType="string">
+		SELECT
+			PASSWD
+		  FROM ACC_USER
+		 WHERE USERID = #{USERID}
+	</select>
+	
+	<!-- 비밀번호 변경 -->
+	<update id="updatePasswd" parameterType="java.util.Map">
+		UPDATE ACC_USER
+		   SET PASSWD = #{NEWPASSWD}
+		 WHERE USERID = #{USERID}
+	</update>
+	
+	<!-- 회원 탈퇴 -->
+	<delete id="deleteUser" parameterType="java.util.Map">
+		DELETE FROM ACC_USER
+		 WHERE USERID = #{USERID}
+	</delete>
 </mapper>

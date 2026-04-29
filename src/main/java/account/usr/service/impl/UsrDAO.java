@@ -15,4 +15,16 @@ public class UsrDAO extends EgovAbstractMapper  {
 	int updateUser(Map<String, Object> inputMap) throws Exception {
 		return update("UsrMapper.updateUser", inputMap);
 	}
+	
+	String selectPasswd(Map<String, Object> inputMap) throws Exception {
+		return selectOne("UsrMapper.selectPasswd", inputMap);
+	}
+	
+	int updatePasswd(Map<String, Object> inputMap) throws Exception {
+		return update("UsrMapper.updatePasswd", inputMap);
+	}
+	
+	int deleteUser(Map<String, Object> inputMap) throws Exception {
+		return delete("UsrMapper.deleteUser", inputMap);
+	}
 }
