@@ -5,21 +5,43 @@
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
 <%@ taglib prefix="fn"     uri="http://java.sun.com/jsp/jstl/functions"%>
 <%@ taglib prefix="fmt"    uri="http://java.sun.com/jsp/jstl/fmt"%>
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>내정보</title>
-</head>
-<body>
 <div class="page-header">
   	<h1>내 정보</h1>
 </div>
 
 <div class="tab-header">
-  	<button class="tab-btn active" data-tab="tabInfo">기본 정보</button>
-  	<button class="tab-btn"       data-tab="tabPw">비밀번호 변경</button>
-  	<button class="tab-btn"       data-tab="tabLeave">회원 탈퇴</button>
+  	<button class="tab-btn active" onclick="switchTab(this, '/usr/usr00m01.do')">기본 정보</button>
+  	<button class="tab-btn"       onclick="switchTab(this, '/usr/usr00m02.do')">비밀번호 변경</button>
+  	<button class="tab-btn"       onclick="switchTab(this, '/usr/usr00m03.do')">회원 탈퇴</button>
 </div>
-</body>
-</html>
+
+<div id="tabContent"></div>
+
+<script>
+	var curUserId = '${sessionScope.USERID}';
+
+	var switchTab = function(el, url) {
+	    $('.tab-btn').removeClass('active');
+	    $(el).addClass('active');
+	    
+	    $.ajax({
+	        url: url,
+	        type: 'POST',
+	        data: { USERID: curUserId }, 
+	        success: function(res) {
+	            $('#tabContent').html(res);
+	        }
+	    });
+	};
+	
+	$(document).ready(function() {
+		$.ajax({
+	        url: '/usr/usr00m01.do',
+	        type: 'POST',
+	        data: { USERID: curUserId },
+	        success: function(res) {
+	            $('#tabContent').html(res);
+	        }
+	    });
+	});
+</script>

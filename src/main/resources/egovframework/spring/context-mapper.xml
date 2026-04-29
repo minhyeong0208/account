@@ -11,6 +11,7 @@
 				<value>classpath:/egovframework/sqlmap/login/*Mapper.xml</value>
 				<value>classpath:/egovframework/sqlmap/use/*Mapper.xml</value>
 				<value>classpath:/egovframework/sqlmap/svg/*Mapper.xml</value>
+				<value>classpath:/egovframework/sqlmap/usr/*Mapper.xml</value>
 			</list>
 		</property>
 	</bean>
