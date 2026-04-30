@@ -186,5 +186,107 @@
 		 WHERE USERID = #{USERID}
 		   AND ACCOUNTID = #{ACCOUNTID}
 	</delete>
+	
+	<!-- 적금 등록 -->
+	<insert id="insertSavings" parameterType="java.util.Map">
+		<selectKey keyProperty="SAVINGSID" resultType="long" order="BEFORE">
+	        SELECT COALESCE(MAX(SAVINGSID), 0) + 1 FROM ACC_SAVINGS WHERE USERID = #{USERID}
+	    </selectKey>
+		INSERT INTO ACC_SAVINGS (
+			SAVINGSID
+		  , USERID
+		  , SAVINGNM
+		  , JOINDATE
+		  , PAYMENTAMOUNT
+		  , INTERESTRATE
+		  , EXPIRATIONDATE
+		  , STATUS
+		  , BANKNAME
+		  , MEMO
+		  , REGID
+		  , REGDATE
+		)
+		VALUES (
+			#{SAVINGSID}
+		  , #{USERID}
+		  , #{SAVINGNM}
+		  , #{JOINDATE}
+		  , #{PAYMENTAMOUNT}
+		  , #{INTERESTRATE}
+		  , #{EXPIRATIONDATE}
+		  , 'A'
+		  , #{BANKNAME}
+		  , #{MEMO}
+		  , #{USERID}
+		  , NOW()
+		)
+	</insert>
 
+	<!-- 적금 목록 조회 -->
+	<select id="selectSavingsList" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT
+			s.SAVINGSID
+		  , s.USERID
+		  , s.SAVINGNM
+		  , DATE_FORMAT(s.JOINDATE, '%Y.%m.%d')       AS JOINDATE
+		  , s.PAYMENTAMOUNT
+		  , s.INTERESTRATE
+		  , DATE_FORMAT(s.EXPIRATIONDATE, '%Y.%m.%d') AS EXPIRATIONDATE
+		  , s.STATUS
+		  , s.BANKNAME
+		  , s.MEMO
+		  , (
+		  	 SELECT COUNT(*) 
+		  	   FROM ACC_SAVINGS_HISTORY h
+			  WHERE h.SAVINGSID = s.SAVINGSID
+				AND h.TYPE = 'R'
+		  ) AS TOTAL_MONTHS  /* 납입기간 총 달 수*/
+		  , (
+		  	 SELECT COUNT(*) 
+		  	   FROM ACC_SAVINGS_HISTORY h
+         	  WHERE h.SAVINGSID = s.SAVINGSID
+         	 	AND h.TYPE = 'R' 
+         	 	AND h.IS_PAID = 'Y'
+          ) AS PAID_MONTHS  /* 납입완료 달 수 */
+          , (
+          	 SELECT COALESCE(SUM(h.PAYAMOUNT), 0) 
+          	   FROM ACC_SAVINGS_HISTORY h
+			  WHERE h.SAVINGSID = s.SAVINGSID
+				AND h.IS_PAID = 'Y'
+          ) AS TOTAL_PAID_AMOUNT
+		  , s.REGID
+		  , s.REGDATE
+		  FROM ACC_SAVINGS s
+		 WHERE s.USERID = #{USERID}
+		 ORDER BY s.REGDATE DESC
+	</select>
+	
+	<!-- 적금 등록할 때 한번에 만기까지 전부 미리 생성 -->
+	<insert id="insertSavingsHistoryBatch" parameterType="java.util.Map">
+		<selectKey keyProperty="HISTORYID" resultType="long" order="BEFORE">
+	        SELECT COALESCE(MAX(HISTORYID), 0) + 1 FROM ACC_SAVINGS_HISTORY WHERE USERID = #{USERID}
+	    </selectKey>
+		INSERT INTO ACC_SAVINGS_HISTORY (
+			HISTORYID
+		  , SAVINGSID
+		  , USERID
+		  , PAYAMOUNT
+		  , TYPE
+		  , IS_PAID
+		  , PAYMONTH
+		  , REGID
+		  , REGDATE
+		) VALUES (
+			#{HISTORYID}
+		  , #{SAVINGSID}
+		  , #{USERID}
+		  , #{PAYAMOUNT}
+		  , 'R' /* 정기납입 */
+		  , 'N'
+		  , #{PAYMONTH}
+		  , #{USERID}
+		  , NOW()
+		)
+	</insert>
+	
 </mapper>

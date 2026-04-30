@@ -1,5 +1,7 @@
 package account.svg.service.impl;
 
+import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -138,5 +140,65 @@ public class SvgServiceImpl extends EgovAbstractServiceImpl implements SvgServic
 		inputMap.put("USERID", SessionManager.getAttribute("USERID"));
 		
 		return svgDAO.selectAccountList(inputMap);
+	}
+	
+	@Override
+	public int insertSavings(Map<String, Object> inputMap) throws Exception {
+		
+		inputMap.put("USERID", SessionManager.getAttribute("USERID"));
+		
+		// 1. 적금 기본 정보 INSERT
+		int res = svgDAO.insertSavings(inputMap);
+		
+		if(res > 0) {
+			String joinDate = (String) inputMap.get("JOINDATE");  // 적금가입일
+			String expireDate = (String) inputMap.get("EXPIRATIONDATE");  // 적금만기일
+			
+			YearMonth start = YearMonth.parse(joinDate.substring(0, 7));
+			YearMonth end   = YearMonth.parse(expireDate.substring(0, 7));
+			
+			YearMonth cur = start;
+			while (!cur.isAfter(end)) {
+	            Map<String, Object> history = new HashMap<>();
+	            history.put("SAVINGSID",  inputMap.get("SAVINGSID"));
+	            history.put("USERID",     inputMap.get("USERID"));
+	            history.put("PAYMONTH",   cur.toString());
+	            history.put("PAYAMOUNT",  inputMap.get("PAYMENTAMOUNT"));
+
+	            svgDAO.insertSavingsHistoryBatch(history);
+
+	            cur = cur.plusMonths(1);
+	        }
+			
+			
+		}
+		
+		return res;
+	}
+	
+	@Override
+	public List<Map<String, Object>> selectSavingsList(Map<String, Object> inputMap) throws Exception {
+		
+		inputMap.put("USERID", SessionManager.getAttribute("USERID"));
+		
+		List<Map<String, Object>> savingsList = svgDAO.selectSavingsList(inputMap);
+		
+		for (Map<String, Object> s : savingsList) {
+		    int totalMonths   = Integer.parseInt(s.get("TOTAL_MONTHS").toString());
+		    int paidMonths    = Integer.parseInt(s.get("PAID_MONTHS").toString());
+		    long paymentAmt   = Long.parseLong(s.get("PAYMENTAMOUNT").toString());
+		    double rate       = Double.parseDouble(s.get("INTERESTRATE").toString());
+
+		    // 진행률
+		    int pct = totalMonths > 0 ? (int)((paidMonths * 100.0) / totalMonths) : 0;
+		    s.put("PROGRESS_PCT", pct);
+
+		    // 예상 수령액 (단리)
+		    long principal = paymentAmt * totalMonths;
+		    long interest  = (long)(principal * (rate / 100));
+		    s.put("EXPECTED_AMOUNT", principal + interest);
+		}
+		
+		return savingsList;
 	}
 }

@@ -53,4 +53,16 @@ public class SvgDAO extends EgovAbstractMapper {
 	public List<Map<String, Object>> selectAccountList(Map<String, Object> inputMap) throws Exception {
 		return selectList("SvgMapper.selectAccountList", inputMap);
 	}
+	
+	int insertSavings(Map<String, Object> inputMap) throws Exception {
+		return insert("SvgMapper.insertSavings", inputMap);
+	}
+	
+	List<Map<String, Object>> selectSavingsList(Map<String, Object> inputMap) throws Exception {
+		return selectList("SvgMapper.selectSavingsList", inputMap);
+	}
+	
+	int insertSavingsHistoryBatch(Map<String, Object> inputMap) throws Exception {
+		return insert("SvgMapper.insertSavingsHistoryBatch", inputMap);
+	}
 }

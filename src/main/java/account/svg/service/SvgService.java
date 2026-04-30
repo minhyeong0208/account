@@ -14,4 +14,7 @@ public interface SvgService {
 	void deleteAccount(List<String> inputList) throws Exception;
 	int selectAccountCnt(Map<String, Object> inputMap) throws Exception;
 	List<Map<String, Object>> selectAccountList(Map<String, Object> inputMap) throws Exception;
+	
+	int insertSavings(Map<String, Object> inputMap) throws Exception;
+	List<Map<String, Object>> selectSavingsList(Map<String, Object> inputMap) throws Exception;
 }

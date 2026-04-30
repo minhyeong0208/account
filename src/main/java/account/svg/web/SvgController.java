@@ -90,7 +90,12 @@ public class SvgController {
         return "account/svg/svg01m00";
     }
 	
-	
+	/**
+	 * 계좌 저장
+	 * @param inputMap
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value = "/saveAccount.do", method = RequestMethod.POST)
 	@ResponseBody
 	public String saveAccount(@RequestBody Map<String, Object> inputMap) throws Exception {
@@ -100,6 +105,12 @@ public class SvgController {
 		return "success";
 	}
 	
+	/**
+	 * 계좌 페이징
+	 * @param inputMap
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value = "/selectAccountListPaging.do", method = RequestMethod.POST)
 	@ResponseBody
 	public Map<String, Object> selectAccountListPaging(@RequestParam Map<String, Object> inputMap) throws Exception {
@@ -115,6 +126,12 @@ public class SvgController {
 	    return resultMap;
 	}
 	
+	/**
+	 * 계좌 삭제
+	 * @param inputList
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value = "/deleteAccount.do", method = RequestMethod.POST)
 	@ResponseBody
 	public String deleteAccount(@RequestBody List<String> inputList) throws Exception {
@@ -124,11 +141,55 @@ public class SvgController {
 		return "success";
 	}
 	
+	/**
+	 * 계좌 리스트 조회
+	 * @param paramMap
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value = "/selectAccountList.do", method = RequestMethod.POST)
 	@ResponseBody
 	public List<Map<String, Object>> selectAccountList(@RequestParam Map<String, Object> paramMap) throws Exception {
 
 		return svgService.selectAccountList(paramMap);
 	}
+	
+	
+	/**
+	 * 적금관리 페이지
+	 * @param inputMap
+	 * @param model
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/svg02m00.do", method = RequestMethod.POST)
+    public String selectSvg02M00List(@RequestParam Map<String, Object> inputMap, Model model) throws Exception {
+		
+		List<Map<String, Object>> savingsList = svgService.selectSavingsList(inputMap);
+
+		model.addAttribute("savingsList", savingsList);
+		
+        return "account/svg/svg02m00";
+    }
+	
+	/**
+	 * 적금 등록
+	 * @param inputMap
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/saveSavings.do", method = RequestMethod.POST)
+	@ResponseBody
+	public String saveSavings(@RequestParam Map<String, Object> inputMap) throws Exception {
+		
+		try {
+	        int res = svgService.insertSavings(inputMap);
+	        return res > 0 ? "success" : "fail";
+	    } catch (Exception e) {
+	    	e.printStackTrace();
+	        return "error";
+	    }
+	}
+	
 	
 }

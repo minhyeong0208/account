@@ -54,7 +54,7 @@
       </a>
     </li>
     <li>
-      <a href="#">
+      <a href="#" onclick="loadContent('/svg/svg02m00.do'); return false;">
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="vertical-align:middle;margin-right:6px;opacity:0.7">
           <path d="M3 13V7l5-5 5 5v6H3z"/>
         </svg>
