@@ -733,4 +733,5 @@
 .empty-state p { margin-top: 8px; }
 
     
-#tabContent { padding: 20px; max-height: 500px; overflow-y: auto; }
+#tabContent { padding: 20px; }
+.payment-panel #tabContent { padding: 20px; max-height: 500px; overflow-y: auto; }
