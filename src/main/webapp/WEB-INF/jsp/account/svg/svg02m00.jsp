@@ -15,17 +15,17 @@
 <div class="summary-cards">
 	<div class="s-card income">
     	<div class="s-label">진행 중인 적금</div>
-    	<div class="s-value">개</div>
-    	<div class="s-sub">총 월 납입 <fmt:formatNumber value="" pattern="#,###"/>원</div>
+    	<div class="s-value">${savingsSummary.ACTIVE_COUNT}개</div>
+    	<div class="s-sub">총 월 납입 <fmt:formatNumber value="${savingsSummary.TOTAL_MONTHLY}" pattern="#,###"/>원</div>
     </div>
 	<div class="s-card expense">
         <div class="s-label">총 납입액</div>
-        <div class="s-value"><fmt:formatNumber value="" pattern="#,###"/>원</div>
+        <div class="s-value"><fmt:formatNumber value="${savingsSummary.TOTAL_PAID}" pattern="#,###"/>원</div>
         <div class="s-sub">지금까지 납입한 금액</div>
     </div>
     <div class="s-card balance">
        	<div class="s-label">예상 총 수령액</div>
-       	<div class="s-value"><fmt:formatNumber value="" pattern="#,###"/>원</div>
+       	<div class="s-value"><fmt:formatNumber value="${savingsSummary.TOTAL_EXPECT}" pattern="#,###"/>원</div>
        	<div class="s-sub">이자 포함</div>
     </div>
 </div>
@@ -41,7 +41,7 @@
 		</c:when>
 		<c:otherwise>
 			<c:forEach var="s" items="${savingsList}">
-				<div class="savings-card" onclick="savingsDetail()">
+				<div class="savings-card">
 					<div class="card-top">
 						<div>
 		                    <div class="card-name">${s.SAVINGNM}</div>
@@ -85,6 +85,10 @@
                   			납입 <span><fmt:formatNumber value="${s.TOTAL_PAID_AMOUNT}" pattern="#,###"/>원</span>
                     · 만기 수령 예상 <span><fmt:formatNumber value="${s.EXPECTED_AMOUNT}" pattern="#,###"/>원</span>
                   		</div>
+                  		<div class="card-actions">
+                    		<button class="btn-sm btn-sm-outline" onclick="detailSavings('${s.SAVINGSID}')">상세</button>
+                    		<button class="btn-sm btn-sm-danger" onclick="deleteSavings('${s.SAVINGSID}','${s.SAVINGNM}')">삭제</button>
+                 	 	</div>
                   	</div>
 				</div>
 			</c:forEach>
@@ -180,6 +184,29 @@
 			success: (res) => {
 				alert("저장되었습니다.");
 				closeAddModal();
+				loadContent('/svg/svg02m00.do');
+			}
+		});
+	}
+	
+	// 적금 상세
+	var detailSavings = (p_sid) => {
+		
+		loadContent('/svg/svg03m00.do', { SAVINGSID: p_sid });
+	}
+	
+	// 적금 삭제
+	var deleteSavings = (p_sid, p_snm) => {
+		
+		if (!confirm('[' + p_snm + '] 적금을 삭제하시겠습니까?\n관련 납입 내역도 모두 삭제됩니다.')) return;
+		
+		$.ajax({
+			url: "/svg/deleteSavings.do",
+			type: "POST",
+			data: {SAVINGSID: p_sid},
+			success: (res) => {
+				alert("삭제되었습니다.");
+				loadContent('/svg/svg02m00.do');
 			}
 		});
 	}

@@ -17,4 +17,14 @@ public interface SvgService {
 	
 	int insertSavings(Map<String, Object> inputMap) throws Exception;
 	List<Map<String, Object>> selectSavingsList(Map<String, Object> inputMap) throws Exception;
+	Map<String, Object> selectSavingsSummary(Map<String, Object> inputMap) throws Exception;
+	int deleteSavings(Map<String, Object> inputMap) throws Exception;
+	
+	Map<String, Object> selectSavingsOne(Map<String, Object> inputMap) throws Exception;
+	List<Map<String, Object>> selectSavingsDetail(Map<String, Object> inputMap) throws Exception;
+	
+	int updateIsPaid(Map<String, Object> inputMap) throws Exception;
+	int insertAddSavingsHistory(Map<String, Object> inputMap) throws Exception;
+	int deleteAddSavings(Map<String, Object> inputMap) throws Exception;
+	Map<String, Object> selectExtraDetail(Map<String, Object> inputMap) throws Exception;
 }

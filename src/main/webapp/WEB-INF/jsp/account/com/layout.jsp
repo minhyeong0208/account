@@ -29,10 +29,11 @@ $(document).ready(function() {
     loadContent('/use/use00m00.do');
 });
 
-function loadContent(url) {
+function loadContent(url, data) {
     $.ajax({
         url: url,
         type: 'POST',
+        data: data || {},
         success: function(res) {
             $('#content').html(res);
         },

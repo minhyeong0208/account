@@ -65,4 +65,36 @@ public class SvgDAO extends EgovAbstractMapper {
 	int insertSavingsHistoryBatch(Map<String, Object> inputMap) throws Exception {
 		return insert("SvgMapper.insertSavingsHistoryBatch", inputMap);
 	}
+	
+	int deleteSavings(Map<String, Object> inputMap) throws Exception {
+		return delete("SvgMapper.deleteSavings", inputMap);
+	}
+	
+	int deleteSavingsDetail(Map<String, Object> inputMap) throws Exception {
+		return delete("SvgMapper.deleteSavingsDetail", inputMap);
+	}
+	
+	Map<String, Object> selectSavingsOne(Map<String, Object> inputMap) throws Exception {
+		return selectOne("SvgMapper.selectSavingsOne", inputMap);
+	}
+	
+	List<Map<String, Object>> selectSavingsDetail(Map<String, Object> inputMap) throws Exception {
+		return selectList("SvgMapper.selectSavingsDetail", inputMap);
+	}
+	
+	int updateIsPaid(Map<String, Object> inputMap) throws Exception {
+		return update("SvgMapper.updateIsPaid", inputMap);
+	}
+	
+	int insertAddSavingsHistory(Map<String, Object> inputMap) throws Exception {
+		return insert("SvgMapper.insertAddSavingsHistory", inputMap);
+	}
+	
+	int deleteAddSavingsDetail(Map<String, Object> inputMap) throws Exception {
+		return delete("SvgMapper.deleteAddSavingsDetail", inputMap);
+	}
+	
+	int updateExpiredSavings(Map<String, Object> inputMap) throws Exception {
+		return update("SvgMapper.updateExpiredSavings", inputMap);
+	}
 }

@@ -264,7 +264,7 @@
 	<!-- 적금 등록할 때 한번에 만기까지 전부 미리 생성 -->
 	<insert id="insertSavingsHistoryBatch" parameterType="java.util.Map">
 		<selectKey keyProperty="HISTORYID" resultType="long" order="BEFORE">
-	        SELECT COALESCE(MAX(HISTORYID), 0) + 1 FROM ACC_SAVINGS_HISTORY WHERE USERID = #{USERID}
+	        SELECT COALESCE(MAX(HISTORYID), 0) + 1 FROM ACC_SAVINGS_HISTORY WHERE USERID = #{USERID} AND SAVINGSID = #{SAVINGSID}
 	    </selectKey>
 		INSERT INTO ACC_SAVINGS_HISTORY (
 			HISTORYID
@@ -288,5 +288,139 @@
 		  , NOW()
 		)
 	</insert>
+	
+	<!-- 적금 삭제 -->
+	<delete id="deleteSavings" parameterType="java.util.Map">
+		DELETE FROM ACC_SAVINGS
+		      WHERE USERID = #{USERID}
+		        AND SAVINGSID = #{SAVINGSID}
+	</delete>
+	
+	<!-- 적금 상세 내역 삭제 -->
+	<delete id="deleteSavingsDetail" parameterType="java.util.Map">
+		DELETE FROM ACC_SAVINGS_HISTORY
+		      WHERE USERID = #{USERID}
+		        AND SAVINGSID = #{SAVINGSID}
+	</delete>
+	
+	<!-- 선택된 적금 정보 -->
+	<select id="selectSavingsOne" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT
+			s.SAVINGSID
+		  , s.USERID
+		  , s.SAVINGNM
+		  , DATE_FORMAT(s.JOINDATE, '%Y.%m.%d')       AS JOINDATE
+		  , s.PAYMENTAMOUNT
+		  , s.INTERESTRATE
+		  , DATE_FORMAT(s.EXPIRATIONDATE, '%Y.%m.%d') AS EXPIRATIONDATE
+		  , s.STATUS
+		  , s.BANKNAME
+		  , s.MEMO
+		  , (
+		  	 SELECT COUNT(*) 
+		  	   FROM ACC_SAVINGS_HISTORY h
+			  WHERE h.SAVINGSID = s.SAVINGSID
+				AND h.TYPE = 'R'
+		  ) AS TOTAL_MONTHS  /* 납입기간 총 달 수*/
+		  , (
+		  	 SELECT COUNT(*) 
+		  	   FROM ACC_SAVINGS_HISTORY h
+         	  WHERE h.SAVINGSID = s.SAVINGSID
+         	 	AND h.TYPE = 'R' 
+         	 	AND h.IS_PAID = 'Y'
+          ) AS PAID_MONTHS  /* 납입완료 달 수 */
+          , (
+          	 SELECT COALESCE(SUM(h.PAYAMOUNT), 0) 
+          	   FROM ACC_SAVINGS_HISTORY h
+			  WHERE h.SAVINGSID = s.SAVINGSID
+				AND h.IS_PAID = 'Y'
+          ) AS TOTAL_PAID_AMOUNT
+		  , s.REGID
+		  , s.REGDATE
+		  FROM ACC_SAVINGS s
+		 WHERE s.USERID = #{USERID}
+		   AND s.SAVINGSID= #{SAVINGSID}
+	</select>
+	
+	<!-- 적금 납입내역 -->
+	<select id="selectSavingsDetail" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT
+			HISTORYID
+		  , SAVINGSID
+		  , USERID
+		  , PAYDATE
+		  , PAYAMOUNT
+		  , TYPE
+		  , IS_PAID
+		  , PAYMONTH
+		  , MEMO
+		  , CASE WHEN PAYMONTH &lt;= DATE_FORMAT(NOW(), '%Y-%m') THEN 'Y' ELSE 'N' END AS IS_CURRENT
+		  FROM ACC_SAVINGS_HISTORY
+		 WHERE USERID = #{USERID}
+		   AND SAVINGSID = #{SAVINGSID}
+		  <if test="TYPE != null and TYPE != ''">
+	       AND TYPE = #{TYPE}
+	      </if>
+	  ORDER BY PAYMONTH ASC
+	</select>
+	
+	<!-- 납입처리 -->
+	<update id="updateIsPaid" parameterType="java.util.Map">
+		UPDATE ACC_SAVINGS_HISTORY
+		   SET IS_PAID = CASE WHEN IS_PAID = 'Y' THEN 'N' ELSE 'Y' END
+             , PAYDATE = CASE WHEN IS_PAID = 'Y' THEN NOW() ELSE NULL END
+		 WHERE USERID = #{USERID}
+		   AND SAVINGSID = #{SAVINGSID}
+		   AND HISTORYID = #{HISTORYID}
+	</update>
+	
+	<!-- 추가 납입 시 사용 -->
+	<insert id="insertAddSavingsHistory" parameterType="java.util.Map">
+		<selectKey keyProperty="HISTORYID" resultType="long" order="BEFORE">
+	        SELECT COALESCE(MAX(HISTORYID), 0) + 1 FROM ACC_SAVINGS_HISTORY WHERE USERID = #{USERID} AND SAVINGSID = #{SAVINGSID}
+	    </selectKey>
+		INSERT INTO ACC_SAVINGS_HISTORY (
+			HISTORYID
+		  , SAVINGSID
+		  , USERID
+		  , PAYDATE
+		  , PAYAMOUNT
+		  , TYPE
+		  , IS_PAID
+		  , PAYMONTH
+		  , MEMO
+		  , REGID
+		  , REGDATE
+		) VALUES (
+			#{HISTORYID}
+		  , #{SAVINGSID}
+		  , #{USERID}
+		  , #{PAYDATE}
+		  , #{PAYAMOUNT}
+		  , 'A'
+		  , 'Y'
+		  , LEFT(#{PAYDATE}, 7)
+		  , #{MEMO}
+		  , #{USERID}
+		  , NOW()
+		)
+	</insert>
+	
+	<!-- 추가 납입 삭제 시 사용 -->
+	<delete id="deleteAddSavingsDetail" parameterType="java.util.Map">
+		DELETE FROM ACC_SAVINGS_HISTORY
+		      WHERE USERID = #{USERID}
+		        AND SAVINGSID = #{SAVINGSID}
+		        AND HISTORYID = #{HISTORYID}
+	</delete>
+	
+	<!-- 적금 만기시 실행 -->
+	<update id="updateExpiredSavings" parameterType="java.util.Map">
+	    UPDATE ACC_SAVINGS
+	       SET STATUS = 'D'
+	     WHERE USERID = #{USERID}
+	       AND STATUS = 'A'
+	       AND EXPIRATIONDATE &lt; NOW()
+	</update>
 	
 </mapper>

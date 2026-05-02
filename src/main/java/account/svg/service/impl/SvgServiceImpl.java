@@ -155,7 +155,7 @@ public class SvgServiceImpl extends EgovAbstractServiceImpl implements SvgServic
 			String expireDate = (String) inputMap.get("EXPIRATIONDATE");  // 적금만기일
 			
 			YearMonth start = YearMonth.parse(joinDate.substring(0, 7));
-			YearMonth end   = YearMonth.parse(expireDate.substring(0, 7));
+			YearMonth end   = YearMonth.parse(expireDate.substring(0, 7)).minusMonths(1);
 			
 			YearMonth cur = start;
 			while (!cur.isAfter(end)) {
@@ -178,27 +178,166 @@ public class SvgServiceImpl extends EgovAbstractServiceImpl implements SvgServic
 	
 	@Override
 	public List<Map<String, Object>> selectSavingsList(Map<String, Object> inputMap) throws Exception {
+
+	    inputMap.put("USERID", SessionManager.getAttribute("USERID"));
+	    
+	    svgDAO.updateExpiredSavings(inputMap);
+	    
+	    List<Map<String, Object>> savingsList = svgDAO.selectSavingsList(inputMap);
+
+	    for (Map<String, Object> s : savingsList) {
+	        int totalMonths = Integer.parseInt(s.get("TOTAL_MONTHS").toString());
+	        int paidMonths  = Integer.parseInt(s.get("PAID_MONTHS").toString());
+	        long paymentAmt = Long.parseLong(s.get("PAYMENTAMOUNT").toString());
+	        double rate     = Double.parseDouble(s.get("INTERESTRATE").toString());
+
+	        // 진행률
+	        int pct = totalMonths > 0 ? (int)((paidMonths * 100.0) / totalMonths) : 0;
+	        s.put("PROGRESS_PCT", pct);
+
+	        // 예상 수령액 (적금 단리)
+	        double monthlyRate = rate / 100 / 12;
+	        long totalInterest = 0;
+	        for (int i = totalMonths - 1; i >= 1; i--) {
+	            totalInterest += (long)(paymentAmt * monthlyRate * i);
+	        }
+	        long principal = paymentAmt * totalMonths;
+	        s.put("EXPECTED_AMOUNT",   principal + totalInterest);
+	    }
+
+	    return savingsList;
+	}
+	
+	@Override
+	public Map<String, Object> selectSavingsSummary(Map<String, Object> inputMap) throws Exception {
+
+	    inputMap.put("USERID", SessionManager.getAttribute("USERID"));
+	    List<Map<String, Object>> savingsList = svgDAO.selectSavingsList(inputMap);
+
+	    int activeCount   = 0;
+	    long totalMonthly = 0;
+	    long totalPaid    = 0;
+	    long totalExpect  = 0;
+
+	    for (Map<String, Object> s : savingsList) {
+	        long paymentAmt = Long.parseLong(s.get("PAYMENTAMOUNT").toString());
+	        int totalMonths = Integer.parseInt(s.get("TOTAL_MONTHS").toString());
+	        double rate     = Double.parseDouble(s.get("INTERESTRATE").toString());
+
+	        // 예상 수령액 (적금 단리)
+	        double monthlyRate = rate / 100 / 12;
+	        long totalInterest = 0;
+	        for (int i = totalMonths - 1; i >= 1; i--) {
+	            totalInterest += (long)(paymentAmt * monthlyRate * i);
+	        }
+	        long principal = paymentAmt * totalMonths;
+	        long expected  = principal + totalInterest;
+
+	        if ("A".equals(s.get("STATUS"))) {
+	            activeCount++;
+	            totalMonthly += paymentAmt;
+	        }
+	        totalPaid   += Long.parseLong(s.get("TOTAL_PAID_AMOUNT").toString());
+	        totalExpect += expected;
+	    }
+
+	    Map<String, Object> summary = new HashMap<>();
+	    summary.put("ACTIVE_COUNT",  activeCount);
+	    summary.put("TOTAL_MONTHLY", totalMonthly);
+	    summary.put("TOTAL_PAID",    totalPaid);
+	    summary.put("TOTAL_EXPECT",  totalExpect);
+
+	    return summary;
+	}
+	
+	@Override
+	public int deleteSavings(Map<String, Object> inputMap) throws Exception {
 		
 		inputMap.put("USERID", SessionManager.getAttribute("USERID"));
 		
-		List<Map<String, Object>> savingsList = svgDAO.selectSavingsList(inputMap);
+		svgDAO.deleteSavings(inputMap);
 		
-		for (Map<String, Object> s : savingsList) {
-		    int totalMonths   = Integer.parseInt(s.get("TOTAL_MONTHS").toString());
-		    int paidMonths    = Integer.parseInt(s.get("PAID_MONTHS").toString());
-		    long paymentAmt   = Long.parseLong(s.get("PAYMENTAMOUNT").toString());
-		    double rate       = Double.parseDouble(s.get("INTERESTRATE").toString());
+		return svgDAO.deleteSavingsDetail(inputMap);
+	}
+	
+	@Override
+	public Map<String, Object> selectSavingsOne(Map<String, Object> inputMap) throws Exception {
 
-		    // 진행률
-		    int pct = totalMonths > 0 ? (int)((paidMonths * 100.0) / totalMonths) : 0;
-		    s.put("PROGRESS_PCT", pct);
+	    inputMap.put("USERID", SessionManager.getAttribute("USERID"));
+	    Map<String, Object> savings = svgDAO.selectSavingsOne(inputMap);
 
-		    // 예상 수령액 (단리)
-		    long principal = paymentAmt * totalMonths;
-		    long interest  = (long)(principal * (rate / 100));
-		    s.put("EXPECTED_AMOUNT", principal + interest);
-		}
+	    int totalMonths = Integer.parseInt(savings.get("TOTAL_MONTHS").toString());
+	    int paidMonths  = Integer.parseInt(savings.get("PAID_MONTHS").toString());
+	    long paymentAmt = Long.parseLong(savings.get("PAYMENTAMOUNT").toString());
+	    double rate     = Double.parseDouble(savings.get("INTERESTRATE").toString());
+
+	    // 진행률
+	    int pct = totalMonths > 0 ? (int)((paidMonths * 100.0) / totalMonths) : 0;
+
+	    // 예상 수령액 (적금 단리)
+	    double monthlyRate = rate / 100 / 12;
+	    long totalInterest = 0;
+	    for (int i = totalMonths - 1; i >= 1; i--) {
+	        totalInterest += (long)(paymentAmt * monthlyRate * i);
+	    }
+	    long principal = paymentAmt * totalMonths;
+
+	    savings.put("PROGRESS_PCT",      pct);
+	    savings.put("EXPECTED_AMOUNT",   principal + totalInterest);
+	    savings.put("EXPECTED_INTEREST", totalInterest);
+
+	    return savings;
+	}
+	
+	@Override
+	public List<Map<String, Object>> selectSavingsDetail(Map<String, Object> inputMap) throws Exception {
+
+		inputMap.put("USERID", SessionManager.getAttribute("USERID"));
 		
-		return savingsList;
+		return svgDAO.selectSavingsDetail(inputMap);
+	}
+	
+	@Override
+	public int updateIsPaid(Map<String, Object> inputMap) throws Exception {
+		
+		inputMap.put("USERID", SessionManager.getAttribute("USERID"));
+		
+		return svgDAO.updateIsPaid(inputMap);
+	}
+	
+	@Override
+	public int insertAddSavingsHistory(Map<String, Object> inputMap) throws Exception {
+
+		inputMap.put("USERID", SessionManager.getAttribute("USERID"));
+		
+		return svgDAO.insertAddSavingsHistory(inputMap);
+	}
+	
+	@Override
+	public int deleteAddSavings(Map<String, Object> inputMap) throws Exception {
+
+		inputMap.put("USERID", SessionManager.getAttribute("USERID"));
+		
+		return svgDAO.deleteAddSavingsDetail(inputMap);
+	}
+	
+	@Override
+	public Map<String, Object> selectExtraDetail(Map<String, Object> inputMap) throws Exception {
+
+		inputMap.put("USERID", SessionManager.getAttribute("USERID"));
+	    
+	    List<Map<String, Object>> detail = svgDAO.selectSavingsDetail(inputMap);
+
+	    long totalAmount = 0;
+	    for (Map<String, Object> d : detail) {
+	        totalAmount += Long.parseLong(d.get("PAYAMOUNT").toString());
+	    }
+
+	    Map<String, Object> result = new HashMap<>();
+	    result.put("detail",           detail);
+	    result.put("extraTotalAmount", totalAmount);
+	    result.put("extraCount",       detail.size());
+
+	    return result;
 	}
 }

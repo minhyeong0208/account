@@ -166,9 +166,11 @@ public class SvgController {
     public String selectSvg02M00List(@RequestParam Map<String, Object> inputMap, Model model) throws Exception {
 		
 		List<Map<String, Object>> savingsList = svgService.selectSavingsList(inputMap);
+		Map<String, Object> savingsSummary = svgService.selectSavingsSummary(inputMap);
 
 		model.addAttribute("savingsList", savingsList);
-		
+		model.addAttribute("savingsSummary", savingsSummary);
+
         return "account/svg/svg02m00";
     }
 	
@@ -191,5 +193,132 @@ public class SvgController {
 	    }
 	}
 	
+	@RequestMapping(value = "/deleteSavings.do", method = RequestMethod.POST)
+	@ResponseBody
+	public String deleteSavings(@RequestParam Map<String, Object> inputMap) throws Exception {
+		
+		try {
+	        int res = svgService.deleteSavings(inputMap);
+	        return res > 0 ? "success" : "fail";
+	    } catch (Exception e) {
+	    	e.printStackTrace();
+	        return "error";
+	    }
+	}
 	
+	/**
+	 * 적금상세 페이지
+	 * @param inputMap
+	 * @param model
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/svg03m00.do", method = RequestMethod.POST)
+    public String selectSvg03M00List(@RequestParam Map<String, Object> inputMap, Model model) throws Exception {
+		
+		try {
+		
+			Map<String, Object> savings = svgService.selectSavingsOne(inputMap);
+		
+			model.addAttribute("savings", savings);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+        return "account/svg/svg03m00";
+    }
+	
+	/**
+	 * 적금상세/정기
+	 * @param inputMap
+	 * @param model
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/svg03m01.do", method = RequestMethod.POST)
+    public String selectSvg03M01View(@RequestParam Map<String, Object> inputMap, Model model) throws Exception {
+		
+		List<Map<String, Object>> detail = svgService.selectSavingsDetail(inputMap);
+		
+		model.addAttribute("detail", detail);
+		
+		return "account/svg/svg03m01";
+	}
+	
+	/**
+	 * 적금 납입 처리
+	 * @param inputMap
+	 * @param model
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/checkPayment.do", method = RequestMethod.POST)
+	@ResponseBody
+    public String checkPayment(@RequestParam Map<String, Object> inputMap) throws Exception {
+		
+		try {
+			int res = svgService.updateIsPaid(inputMap);
+	        return res > 0 ? "success" : "fail";
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "error";
+		}
+	}
+	
+	/**
+	 * 적금상세/추가
+	 * @param inputMap
+	 * @param model
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/svg03m02.do", method = RequestMethod.POST)
+    public String selectSvg03M02View(@RequestParam Map<String, Object> inputMap, Model model) throws Exception {
+
+		Map<String, Object> result = svgService.selectExtraDetail(inputMap);
+
+		model.addAttribute("detail", result.get("detail"));
+		model.addAttribute("extraTotalAmount", result.get("extraTotalAmount"));
+		model.addAttribute("extraCount", result.get("extraCount"));
+		
+		return "account/svg/svg03m02";
+	}
+	
+	/**
+	 * 추가납입 저장
+	 * @param inputMap
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/saveAddSavings.do", method = RequestMethod.POST)
+	@ResponseBody
+	public String saveAddSavings(@RequestParam Map<String, Object> inputMap) throws Exception {
+		
+		try {
+			int res = svgService.insertAddSavingsHistory(inputMap);
+			return res > 0 ? "success" : "fail";
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "error";
+		}
+	}
+	
+	/**
+	 * 추가납입 내역 삭제
+	 * @param inputMap
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/deleteAddSavings.do", method = RequestMethod.POST)
+	@ResponseBody
+	public String deleteAddSavings(@RequestParam Map<String, Object> inputMap) throws Exception {
+		
+		try {
+			int res = svgService.deleteAddSavings(inputMap);
+			return res > 0 ? "success" : "fail";
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "error";
+		}
+	}
 }
