@@ -43,7 +43,7 @@
           <input type="checkbox" name="rememberMe"/>
           로그인 유지
         </label>
-        <a href="#" class="forgot-link">비밀번호 재설정</a>
+        <a href="#" class="forgot-link">임시 비밀번호 발급</a>
       </div>
 
       <button type="submit" class="btn-login">로그인</button>
