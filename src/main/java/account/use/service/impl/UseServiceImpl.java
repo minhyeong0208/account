@@ -115,9 +115,9 @@ public class UseServiceImpl extends EgovAbstractServiceImpl implements UseServic
 
     	    long balance = balMap.get(accountId);
 
-    	    if ("I".equals(type)) {
+    	    if ("I".equals(type) || "TI".equals(type)) {
     	        balance += amount;
-    	    } else {
+    	    } else if ("O".equals(type) || "TO".equals(type)) {
     	        balance -= amount;
     	    }
     	    
@@ -186,8 +186,11 @@ public class UseServiceImpl extends EgovAbstractServiceImpl implements UseServic
 	        long amount = MapUtils.getLong(row.get("TRANAMOUNT"));
 
 	        long balance = balMap.get(accountId);
-	        if ("I".equals(type)) balance += amount;
-	        else balance -= amount;
+	        if ("I".equals(type) || "TI".equals(type)) {
+	            balance += amount;
+	        } else if ("O".equals(type) || "TO".equals(type)) {
+	            balance -= amount;
+	        }
 
 	        row.put("TRANAFTAMOUNT", balance);
 	        balMap.put(accountId, balance);
@@ -467,8 +470,11 @@ public class UseServiceImpl extends EgovAbstractServiceImpl implements UseServic
 	        long amount    = MapUtils.getLong(row.get("TRANAMOUNT"));
 
 	        long balance = balMap.get(accountId);
-	        if ("I".equals(type)) balance += amount;
-	        else balance -= amount;
+	        if ("I".equals(type) || "TI".equals(type)) {
+	            balance += amount;
+	        } else if ("O".equals(type) || "TO".equals(type)) {
+	            balance -= amount;
+	        }
 
 	        row.put("TRANAFTAMOUNT", balance);
 	        balMap.put(accountId, balance);
@@ -499,6 +505,8 @@ public class UseServiceImpl extends EgovAbstractServiceImpl implements UseServic
 	    XSSFColor white       = new XSSFColor(new byte[]{(byte)255, (byte)255, (byte)255}, null);
 	    XSSFColor incomeText  = new XSSFColor(new byte[]{(byte)12,  (byte)68,  (byte)124}, null);
 	    XSSFColor expenseText = new XSSFColor(new byte[]{(byte)163, (byte)45,  (byte)45},  null);
+	    XSSFColor transferBg   = new XSSFColor(new byte[]{(byte)240, (byte)240, (byte)240}, null);
+	    XSSFColor transferText = new XSSFColor(new byte[]{(byte)85,  (byte)85,  (byte)85},  null);
 
 	    // ── 타이틀 스타일 ──
 	    XSSFCellStyle titleStyle = workbook.createCellStyle();
@@ -561,6 +569,21 @@ public class UseServiceImpl extends EgovAbstractServiceImpl implements UseServic
 	    expenseFont.setFontHeightInPoints((short) 10);
 	    expenseFont.setFontName("맑은 고딕");
 	    expenseStyle.setFont(expenseFont);
+	    
+	    XSSFCellStyle transferStyle = workbook.createCellStyle();
+	    transferStyle.setFillForegroundColor(transferBg);
+	    transferStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+	    transferStyle.setAlignment(HorizontalAlignment.CENTER);
+	    transferStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+	    transferStyle.setBorderTop(BorderStyle.THIN);
+	    transferStyle.setBorderBottom(BorderStyle.THIN);
+	    transferStyle.setBorderLeft(BorderStyle.THIN);
+	    transferStyle.setBorderRight(BorderStyle.THIN);
+	    XSSFFont transferFont = workbook.createFont();
+	    transferFont.setColor(transferText);
+	    transferFont.setFontHeightInPoints((short) 10);
+	    transferFont.setFontName("맑은 고딕");
+	    transferStyle.setFont(transferFont);
 
 	    // ── 타이틀 행 (1행) ──
 	    Row titleRow = sheet.createRow(0);
@@ -586,16 +609,20 @@ public class UseServiceImpl extends EgovAbstractServiceImpl implements UseServic
 	        Row row = sheet.createRow(i + 2);
 	        row.setHeight((short) 450);
 
-	        boolean isIncome = "I".equals(item.get("TRANTYPE"));
-	        XSSFCellStyle rowStyle = isIncome ? incomeStyle : expenseStyle;
+	        String tranType    = String.valueOf(item.get("TRANTYPE"));
+	        boolean isIncome   = "I".equals(tranType) || "TI".equals(tranType);
+	        boolean isTransfer = "TI".equals(tranType) || "TO".equals(tranType);
+	        XSSFCellStyle rowStyle = "I".equals(tranType) ? incomeStyle
+                    : isTransfer ? transferStyle
+                    : expenseStyle;
 
-	        Cell c0 = row.createCell(0); c0.setCellValue(String.valueOf(item.getOrDefault("BANKNM", "")));       c0.setCellStyle(rowStyle);
-	        Cell c1 = row.createCell(1); c1.setCellValue(String.valueOf(item.getOrDefault("TRANDATE", "")));     c1.setCellStyle(rowStyle);
-	        Cell c2 = row.createCell(2); c2.setCellValue(String.valueOf(item.getOrDefault("TRANTIME", "")));     c2.setCellStyle(rowStyle);
-	        Cell c3 = row.createCell(3); c3.setCellValue(isIncome ? "입금" : "출금");                             c3.setCellStyle(rowStyle);
-	        Cell c4 = row.createCell(4); c4.setCellValue(String.valueOf(item.getOrDefault("DESCRIPTION", "")));  c4.setCellStyle(rowStyle);
-	        Cell c5 = row.createCell(5); c5.setCellValue(String.valueOf(item.getOrDefault("CATEGORYNM", "")));   c5.setCellStyle(rowStyle);
-	        Cell c6 = row.createCell(6); c6.setCellValue(String.valueOf(item.getOrDefault("TRANAMOUNT", "")));   c6.setCellStyle(rowStyle);
+	        Cell c0 = row.createCell(0); c0.setCellValue(String.valueOf(item.getOrDefault("BANKNM", "")));        c0.setCellStyle(rowStyle);
+	        Cell c1 = row.createCell(1); c1.setCellValue(String.valueOf(item.getOrDefault("TRANDATE", "")));      c1.setCellStyle(rowStyle);
+	        Cell c2 = row.createCell(2); c2.setCellValue(String.valueOf(item.getOrDefault("TRANTIME", "")));      c2.setCellStyle(rowStyle);
+	        Cell c3 = row.createCell(3); c3.setCellValue("I".equals(tranType) ? "입금" : "O".equals(tranType) ? "출금" : "이체");        c3.setCellStyle(rowStyle);
+	        Cell c4 = row.createCell(4); c4.setCellValue(String.valueOf(item.getOrDefault("DESCRIPTION", "")));   c4.setCellStyle(rowStyle);
+	        Cell c5 = row.createCell(5); c5.setCellValue(String.valueOf(item.getOrDefault("CATEGORYNM", "")));    c5.setCellStyle(rowStyle);
+	        Cell c6 = row.createCell(6); c6.setCellValue(String.valueOf(item.getOrDefault("TRANAMOUNT", "")));    c6.setCellStyle(rowStyle);
 	        Cell c7 = row.createCell(7); c7.setCellValue(String.valueOf(item.getOrDefault("TRANAFTAMOUNT", ""))); c7.setCellStyle(rowStyle);
 	    }
 

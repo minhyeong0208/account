@@ -56,6 +56,8 @@
 							<select class="CLASSIFICATION" name="CLASSIFICATION">
 								<option value="I" <c:if test="${item.CLASSIFICATION eq 'I'}">selected</c:if>>입금</option>
 								<option value="O" <c:if test="${item.CLASSIFICATION eq 'O'}">selected</c:if>>출금</option>
+								<option value="TI" <c:if test="${item.CLASSIFICATION eq 'TI'}">selected</c:if>>이체(입)</option>
+    							<option value="TO" <c:if test="${item.CLASSIFICATION eq 'TO'}">selected</c:if>>이체(출)</option>
 							</select>
 						</td>
 					</tr>
@@ -80,6 +82,8 @@
 					<select class="CLASSIFICATION" name="CLASSIFICATION[]">
 						<option value="I">입금</option>
 						<option value="O">출금</option>
+						<option value="TI">이체(입)</option>
+					    <option value="TO">이체(출)</option>
 					</select>
 				</td>
 			</tr>
@@ -214,6 +218,8 @@
 
 		            let selectedI = item.CLASSIFICATION === "I" ? "selected" : "";
 		            let selectedO = item.CLASSIFICATION === "O" ? "selected" : "";
+		            let selectedTI = item.CLASSIFICATION === "TI" ? "selected" : "";
+		            let selectedTO = item.CLASSIFICATION === "TO" ? "selected" : "";
 		            html += "<tr>"
 		            html += "  <td style=\"text-align:center\">"
 		            html += "    <input type=\"checkbox\" class=\"chk\">"
@@ -226,6 +232,8 @@
 		            html += "    <select class=\"CLASSIFICATION\" name=\"CLASSIFICATION\">"
 		            html += "      <option value=\"I\"" + selectedI+ ">입금</option>"
 		            html += "      <option value=\"O\"" + selectedO + ">출금</option>"
+		            html += "      <option value=\"TI\" " + selectedTI + ">이체(입)</option>"
+		            html += "      <option value=\"TO\" " + selectedTO + ">이체(출)</option>"
 		            html += "    </select>"
 		            html += "  </td>"
 		            html += "</tr>"

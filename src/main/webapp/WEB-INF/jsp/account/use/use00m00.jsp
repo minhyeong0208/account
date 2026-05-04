@@ -349,11 +349,14 @@
             html += "  </td>";
             html += "  <td><input type='date' class='TRANDATE' value='" + (item.TRANDATE || "") + "'></td>";
             html += "  <td><input type='time' class='TRANTIME' name='TRANTIME[]' value='" + (item.TRANTIME || "") + "' step='1'></td>";
-            html += "  <td style='text-align:center;'><span class='" +
-           			 ((item.TRANTYPE === "O") ? "badge badge-expense" : "badge badge-income") +
-            			"'>" +
-            		 ((item.TRANTYPE === "O") ? "출금" : "입금") +
-            			"</span></td>";html += "  <td><input type='text' class='DESCRIPTION' value='" + (item.DESCRIPTION || "") + "'></td>";
+            let tranClass = item.TRANTYPE === "O"  ? "badge badge-expense"
+                    : item.TRANTYPE === "I"  ? "badge badge-income"
+                    : "badge badge-transfer";
+      		let tranText  = item.TRANTYPE === "O"  ? "출금"
+                    : item.TRANTYPE === "I"  ? "입금"
+                    : "이체";
+      		html += "  <td style='text-align:center;'><span class='" + tranClass + "'>" + tranText + "</span></td>";
+            html += "  <td><input type='text' class='DESCRIPTION' value='" + (item.DESCRIPTION || "") + "'></td>";
             html += "  <td style='text-align:center;'>" + (item.CATEGORYNM || "") + "</td>";
             html += "  <td><input type='text' class='TRANAMOUNT' value='" + (item.TRANAMOUNT || "") + "'></td>";
             html += "  <td>" + item.TRANAFTAMOUNT + "</td>";
@@ -412,6 +415,8 @@
 					<option value="">전체</option>
 					<option value="I">입금</option>
 					<option value="O">출금</option>
+					<option value="TI">이체(입)</option>
+		            <option value="TO">이체(출)</option>
 				</select>
 			`;
 		} else if(key === "categoryId") {
@@ -599,8 +604,12 @@
 	                break;
 	            }
 	        }
-	        var badgeClass = tranType === 'O' ? 'badge badge-expense' : 'badge badge-income';
-	        var badgeText  = tranType === 'O' ? '출금' : '입금';
+	        var badgeClass = tranType === 'O' ? 'badge badge-expense'
+	                : tranType === 'I' ? 'badge badge-income'
+	                : 'badge badge-transfer';
+	 		var badgeText  = tranType === 'O' ? '출금'
+	                : tranType === 'I' ? '입금'
+	                : '이체';
 	
 	        html += '<tr>';
 	        html += '  <td style="padding:6px 10px; text-align:center; vertical-align:middle; width:100px;">' + usageNm + '</td>';

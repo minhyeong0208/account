@@ -421,6 +421,7 @@
 .badge { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 4px; font-weight: 500; }
 .badge-income  { background: var(--color-income-bg); color: var(--color-primary-dark); }
 .badge-expense { background: var(--color-expense-bg); color: var(--color-expense); }
+.badge-transfer { background: #F0F0F0; color: #555; }
 
 /* ── 페이지네이션 ── */
 #pagination {
