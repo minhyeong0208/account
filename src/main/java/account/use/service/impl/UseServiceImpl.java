@@ -1,5 +1,6 @@
 package account.use.service.impl;
 
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,7 +10,21 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
 
+import org.apache.poi.ss.usermodel.BorderStyle;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFColor;
+import org.apache.poi.xssf.usermodel.XSSFFont;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.egovframe.rte.fdl.cmmn.EgovAbstractServiceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -459,5 +474,146 @@ public class UseServiceImpl extends EgovAbstractServiceImpl implements UseServic
 	        balMap.put(accountId, balance);
 	        useDAO.updateAfterAmount(row);
 	    }
+	}
+	
+	@Override
+	public void downloadExcel(Map<String, Object> inputMap, HttpServletResponse response) throws Exception {
+
+	    inputMap.put("USERID", SessionManager.getAttribute("USERID"));
+
+	    List<Map<String, Object>> list = useDAO.selectHistoryList(inputMap);
+
+	    String month = String.valueOf(inputMap.get("month"));
+	    String fileName = URLEncoder.encode(month + "_거래내역.xlsx", "UTF-8");
+	    response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+	    response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+
+	    XSSFWorkbook workbook = new XSSFWorkbook();
+	    Sheet sheet = workbook.createSheet("거래내역");
+
+	    // ── 색상 ──
+	    XSSFColor headerBg    = new XSSFColor(new byte[]{(byte)24,  (byte)95,  (byte)165}, null);
+	    XSSFColor titleBg     = new XSSFColor(new byte[]{(byte)12,  (byte)68,  (byte)124}, null);
+	    XSSFColor incomeBg    = new XSSFColor(new byte[]{(byte)230, (byte)241, (byte)251}, null);
+	    XSSFColor expenseBg   = new XSSFColor(new byte[]{(byte)252, (byte)235, (byte)235}, null);
+	    XSSFColor white       = new XSSFColor(new byte[]{(byte)255, (byte)255, (byte)255}, null);
+	    XSSFColor incomeText  = new XSSFColor(new byte[]{(byte)12,  (byte)68,  (byte)124}, null);
+	    XSSFColor expenseText = new XSSFColor(new byte[]{(byte)163, (byte)45,  (byte)45},  null);
+
+	    // ── 타이틀 스타일 ──
+	    XSSFCellStyle titleStyle = workbook.createCellStyle();
+	    titleStyle.setFillForegroundColor(titleBg);
+	    titleStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+	    titleStyle.setAlignment(HorizontalAlignment.CENTER);
+	    titleStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+	    XSSFFont titleFont = workbook.createFont();
+	    titleFont.setColor(white);
+	    titleFont.setBold(true);
+	    titleFont.setFontHeightInPoints((short) 14);
+	    titleFont.setFontName("맑은 고딕");
+	    titleStyle.setFont(titleFont);
+
+	    // ── 헤더 스타일 ──
+	    XSSFCellStyle headerStyle = workbook.createCellStyle();
+	    headerStyle.setFillForegroundColor(headerBg);
+	    headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+	    headerStyle.setAlignment(HorizontalAlignment.CENTER);
+	    headerStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+	    headerStyle.setBorderTop(BorderStyle.MEDIUM);
+	    headerStyle.setBorderBottom(BorderStyle.MEDIUM);
+	    headerStyle.setBorderLeft(BorderStyle.THIN);
+	    headerStyle.setBorderRight(BorderStyle.THIN);
+	    XSSFFont headerFont = workbook.createFont();
+	    headerFont.setColor(white);
+	    headerFont.setBold(true);
+	    headerFont.setFontHeightInPoints((short) 11);
+	    headerFont.setFontName("맑은 고딕");
+	    headerStyle.setFont(headerFont);
+
+	    // ── 입금 스타일 ──
+	    XSSFCellStyle incomeStyle = workbook.createCellStyle();
+	    incomeStyle.setFillForegroundColor(incomeBg);
+	    incomeStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+	    incomeStyle.setAlignment(HorizontalAlignment.CENTER);
+	    incomeStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+	    incomeStyle.setBorderTop(BorderStyle.THIN);
+	    incomeStyle.setBorderBottom(BorderStyle.THIN);
+	    incomeStyle.setBorderLeft(BorderStyle.THIN);
+	    incomeStyle.setBorderRight(BorderStyle.THIN);
+	    XSSFFont incomeFont = workbook.createFont();
+	    incomeFont.setColor(incomeText);
+	    incomeFont.setFontHeightInPoints((short) 10);
+	    incomeFont.setFontName("맑은 고딕");
+	    incomeStyle.setFont(incomeFont);
+
+	    // ── 출금 스타일 ──
+	    XSSFCellStyle expenseStyle = workbook.createCellStyle();
+	    expenseStyle.setFillForegroundColor(expenseBg);
+	    expenseStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+	    expenseStyle.setAlignment(HorizontalAlignment.CENTER);
+	    expenseStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+	    expenseStyle.setBorderTop(BorderStyle.THIN);
+	    expenseStyle.setBorderBottom(BorderStyle.THIN);
+	    expenseStyle.setBorderLeft(BorderStyle.THIN);
+	    expenseStyle.setBorderRight(BorderStyle.THIN);
+	    XSSFFont expenseFont = workbook.createFont();
+	    expenseFont.setColor(expenseText);
+	    expenseFont.setFontHeightInPoints((short) 10);
+	    expenseFont.setFontName("맑은 고딕");
+	    expenseStyle.setFont(expenseFont);
+
+	    // ── 타이틀 행 (1행) ──
+	    Row titleRow = sheet.createRow(0);
+	    titleRow.setHeight((short) 800);
+	    Cell titleCell = titleRow.createCell(0);
+	    titleCell.setCellValue(month + " 거래내역");
+	    titleCell.setCellStyle(titleStyle);
+	    sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 7));
+
+	    // ── 헤더 행 (2행) ──
+	    Row headerRow = sheet.createRow(1);
+	    headerRow.setHeight((short) 550);
+	    String[] columns = {"은행명", "거래일자", "거래시각", "거래유형", "내용", "항목", "금액", "잔액"};
+	    for (int i = 0; i < columns.length; i++) {
+	        Cell cell = headerRow.createCell(i);
+	        cell.setCellValue(columns[i]);
+	        cell.setCellStyle(headerStyle);
+	    }
+
+	    // ── 데이터 행 (3행부터) ──
+	    for (int i = 0; i < list.size(); i++) {
+	        Map<String, Object> item = list.get(i);
+	        Row row = sheet.createRow(i + 2);
+	        row.setHeight((short) 450);
+
+	        boolean isIncome = "I".equals(item.get("TRANTYPE"));
+	        XSSFCellStyle rowStyle = isIncome ? incomeStyle : expenseStyle;
+
+	        Cell c0 = row.createCell(0); c0.setCellValue(String.valueOf(item.getOrDefault("BANKNM", "")));       c0.setCellStyle(rowStyle);
+	        Cell c1 = row.createCell(1); c1.setCellValue(String.valueOf(item.getOrDefault("TRANDATE", "")));     c1.setCellStyle(rowStyle);
+	        Cell c2 = row.createCell(2); c2.setCellValue(String.valueOf(item.getOrDefault("TRANTIME", "")));     c2.setCellStyle(rowStyle);
+	        Cell c3 = row.createCell(3); c3.setCellValue(isIncome ? "입금" : "출금");                             c3.setCellStyle(rowStyle);
+	        Cell c4 = row.createCell(4); c4.setCellValue(String.valueOf(item.getOrDefault("DESCRIPTION", "")));  c4.setCellStyle(rowStyle);
+	        Cell c5 = row.createCell(5); c5.setCellValue(String.valueOf(item.getOrDefault("CATEGORYNM", "")));   c5.setCellStyle(rowStyle);
+	        Cell c6 = row.createCell(6); c6.setCellValue(String.valueOf(item.getOrDefault("TRANAMOUNT", "")));   c6.setCellStyle(rowStyle);
+	        Cell c7 = row.createCell(7); c7.setCellValue(String.valueOf(item.getOrDefault("TRANAFTAMOUNT", ""))); c7.setCellStyle(rowStyle);
+	    }
+
+	    // ── 열 너비 ──
+	    sheet.setColumnWidth(0, 3000);
+	    sheet.setColumnWidth(1, 3500);
+	    sheet.setColumnWidth(2, 3000);
+	    sheet.setColumnWidth(3, 2500);
+	    sheet.setColumnWidth(4, 7000);
+	    sheet.setColumnWidth(5, 3000);
+	    sheet.setColumnWidth(6, 4000);
+	    sheet.setColumnWidth(7, 4000);
+
+	    // ── 헤더 고정 ──
+	    sheet.createFreezePane(0, 2);
+
+	    workbook.write(response.getOutputStream());
+	    workbook.close();
+	    response.getOutputStream().flush();
 	}
 }

@@ -3,6 +3,8 @@ package account.use.service;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.web.multipart.MultipartFile;
 
 public interface UseService {
@@ -17,4 +19,5 @@ public interface UseService {
 	Map<String, Object> getAnnualData(Map<String, Object> inputMap) throws Exception;
 	Map<String, Object> uploadExcel(Map<String, Object> inputMap, MultipartFile file) throws Exception;
 	void saveUnregAndUpload(Map<String, Object> inputMap) throws Exception;
+	void downloadExcel(Map<String, Object> inputMap, HttpServletResponse response) throws Exception;
 }

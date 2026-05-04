@@ -18,6 +18,11 @@
 		  , h.TRANTIME
 		  , h.DELYN
 		  , a.ACCOUNTNUM
+		  , CASE WHEN a.BANKNM = 'KM' THEN '국민'
+		         WHEN a.BANKNM = 'SH' THEN '신한'
+		         WHEN a.BANKNM = 'WR' THEN '우리'
+		         ELSE ''
+		         END AS BANKNM
 		  FROM ACC_HISTORY h
 	INNER JOIN ACC_ACCOUNT a
 		    ON h.ACCOUNTID= a.ACCOUNTID 

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -183,5 +184,14 @@ public class UseController {
 		useService.saveUnregAndUpload(inputMap);
 	    
 		return "success";
+	}
+	
+	/**
+	 * 월별 내역 다운로드
+	 */
+	@RequestMapping(value = "/downloadExcel.do", method = RequestMethod.POST)
+	public void downloadExcel(@RequestParam Map<String, Object> inputMap, HttpServletResponse response) throws Exception {
+
+		useService.downloadExcel(inputMap, response);
 	}
 }

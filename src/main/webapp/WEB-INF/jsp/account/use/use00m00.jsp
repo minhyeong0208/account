@@ -47,6 +47,7 @@
 		</div>
 		<div>
 			<button type="button" class="toolbar-btn toolbar-btn-outline" onclick="openUploadModal()">엑셀 업로드</button>
+			<button type="button" class="toolbar-btn toolbar-btn-excel" onclick="downloadExcel()">엑셀 다운로드</button>
 			<button type="button" class="toolbar-btn toolbar-btn-outline" onclick="addRow()">내역 추가</button>
 			<button type="button" class="toolbar-btn toolbar-btn-success" onclick="save()">저장</button>
 			<button type="button" class="toolbar-btn toolbar-btn-danger" onclick="deleteRow()">삭제</button>
@@ -702,6 +703,25 @@
 	        }
 	    });
 	};
+	
+	var downloadExcel = () => {
+	    let searchKey = $("select[name='searchKey']").val();
+	    let searchValue = $("[name='searchValue']").val();
+
+	    // 임시 폼 생성 및 전송
+	    let $form = $("<form>", {
+	        action: "/use/downloadExcel.do",
+	        method: "POST"
+	    });
+
+	    $form.append($("<input>", { type: "hidden", name: "searchKey", value: searchKey }));
+	    $form.append($("<input>", { type: "hidden", name: "searchValue", value: searchValue }));
+	    $form.append($("<input>", { type: "hidden", name: "month", value: currentMonth }));
+
+	    $("body").append($form);
+	    $form.submit();
+	    $form.remove(); // 전송 후 삭제
+	}
 </script>
 </body>
 </html>

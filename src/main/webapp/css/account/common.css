@@ -735,3 +735,7 @@
     
 #tabContent { padding: 20px; }
 .payment-panel #tabContent { padding: 20px; max-height: 500px; overflow-y: auto; }
+
+/* ── 엑셀 다운로드 버튼 ── */
+.toolbar-btn-excel { background: #1D6F42; color: #fff; border: none; }
+.toolbar-btn-excel:hover { background: #155233; }
