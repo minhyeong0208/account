@@ -111,4 +111,16 @@ public class LgnController {
 	        return "fail";
 	    }
 	}
+	
+	@RequestMapping(value = "/sendTempPassword.do")
+	@ResponseBody
+	public String sendTempPassword(@RequestParam Map<String, Object> inputMap) throws Exception {
+		try {
+		lgnService.sendTempPassword(inputMap);
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+		return "success";
+	}
 }

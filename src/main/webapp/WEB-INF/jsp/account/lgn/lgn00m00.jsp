@@ -43,7 +43,7 @@
           <input type="checkbox" name="rememberMe"/>
           로그인 유지
         </label>
-        <a href="#" class="forgot-link">임시 비밀번호 발급</a>
+        <a href="#" class="forgot-link" onclick="openTempPwModal()">임시 비밀번호 발급</a>
       </div>
 
       <button type="submit" class="btn-login">로그인</button>
@@ -57,7 +57,61 @@
 </div>
 
 <script>
-
+	var openTempPwModal = () => {
+		if ($('#tempPwModal').length === 0) {
+			$('body').append(
+				'<div class="modal-overlay" id="tempPwModal">' +
+				'  <div class="modal">' +
+				'    <div class="modal-header">' +
+				'      <h3>임시 비밀번호 발급</h3>' +
+				'      <button class="modal-close" onclick="closeTempPwModal()">✕</button>' +
+				'    </div>' +
+				'    <div class="modal-body">' +
+				'      <div class="modal-form-row">' +
+				'        <label>아이디</label>' +
+				'        <input type="text" id="USERID">' +
+				'      </div>' +
+				'      <div class="modal-form-row">' +
+				'        <label>이메일</label>' +
+				'        <input type="text" id="EMAIL">' +
+				'      </div>' +
+				'    </div>' +
+				'    <div class="modal-footer">' +
+				'      <button type="button" class="toolbar-btn toolbar-btn-danger" onclick="closeTempPwModal()">취소</button>' +
+				'      <button type="button" class="toolbar-btn toolbar-btn-primary" onclick="requestTempPw()">발급</button>' +
+				'    </div>' +
+				'  </div>' +
+				'</div>'
+			);
+		}
+		$('#tempPwModal').addClass('open');
+	}
+	
+	var closeTempPwModal = () => {
+		$('#tempPwModal').removeClass('open');
+		$('#USERID').val('');
+		$('#EMAIL').val('');
+	}
+	
+	var requestTempPw = () => {
+		let userId = $("#USERID").val().trim();
+	    let email  = $("#EMAIL").val().trim();
+	    
+	    if (!userId || !email) {
+	        alert("아이디와 이메일을 입력해주세요.");
+	        return;
+	    }
+	    
+	    $.ajax({
+	        url: "/lgn/sendTempPassword.do",
+	        type: "POST",
+	        data: { USERID: userId, EMAIL: email },
+	        success: function(res) {
+                alert("임시 비밀번호가 이메일로 발송되었습니다.");
+                closeTempPwModal();
+	        }
+	    });
+	}
 </script>
 </body>
 </html>

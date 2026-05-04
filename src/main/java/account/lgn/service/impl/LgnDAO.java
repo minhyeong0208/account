@@ -20,4 +20,12 @@ public class LgnDAO extends EgovAbstractMapper {
 	int insertUser(Map<String, Object> inputMap) throws Exception {
 		return insert("LoginMapper.insertUser", inputMap);
 	}
+	
+	int selectUserByIdAndEmail(Map<String, Object> inputMap) throws Exception {
+		return selectOne("LoginMapper.selectUserByIdAndEmail", inputMap);
+	}
+	
+	int updatePassword(Map<String, Object> inputMap) throws Exception {
+		return update("LoginMapper.updatePassword", inputMap);
+	}
 }

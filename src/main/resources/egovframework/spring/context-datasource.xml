@@ -23,8 +23,7 @@
 	    <property name="javaMailProperties">
 	        <props>
 	            <prop key="mail.smtp.auth">true</prop>
-	            <prop key="mail.smtp.ssl.enable">true</prop>
-	            <prop key="mail.smtp.ssl.trust">smtp.naver.com</prop>
+	            <prop key="mail.smtp.starttls.enable">true</prop>
 	        </props>
 	    </property>
 	</bean>

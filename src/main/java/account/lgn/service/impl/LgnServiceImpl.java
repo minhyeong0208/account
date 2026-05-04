@@ -2,13 +2,17 @@ package account.lgn.service.impl;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import org.egovframe.rte.fdl.cmmn.EgovAbstractServiceImpl;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import account.lgn.service.LgnService;
 import javax.annotation.Resource;
+import javax.mail.internet.MimeMessage;
 
 @Service("lgnService")
 public class LgnServiceImpl extends EgovAbstractServiceImpl implements LgnService {
@@ -16,6 +20,8 @@ public class LgnServiceImpl extends EgovAbstractServiceImpl implements LgnServic
 	@Resource(name = "lgnDAO")
     private LgnDAO lgnDAO;
 
+	@Resource(name = "mailSender")
+	private JavaMailSender mailSender;
 	
 	/**
 	 * 로그인
@@ -68,5 +74,43 @@ public class LgnServiceImpl extends EgovAbstractServiceImpl implements LgnServic
 		
 		 
 		return lgnDAO.insertUser(inputMap);
+	}
+	
+	@Override
+	public void sendTempPassword(Map<String, Object> inputMap) throws Exception {
+		
+		int cnt = lgnDAO.selectUserByIdAndEmail(inputMap);
+		
+		if (cnt == 0) {
+			throw new Exception("일치하는 회원 정보가 없습니다.");
+		}
+		
+		String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+	    StringBuilder sb = new StringBuilder();
+	    Random random = new java.util.Random();
+	    for (int i = 0; i < 8; i++) {
+	        sb.append(chars.charAt(random.nextInt(chars.length())));
+	    }
+	    
+	    // 임시 비밀번호 생성 (영문+숫자 8자리)
+	    String tempPw = sb.toString();
+	    BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+	    inputMap.put("PASSWD", passwordEncoder.encode(tempPw));
+	    lgnDAO.updatePassword(inputMap);
+	    
+	    // 메일 발송
+	    MimeMessage message = mailSender.createMimeMessage();
+	    MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+	    helper.setTo((String) inputMap.get("EMAIL"));
+	    helper.setSubject("[가계부] 임시 비밀번호 발급");
+	    helper.setText(
+	        "<h3>임시 비밀번호가 발급되었습니다.</h3>" +
+	        "<p>임시 비밀번호: <strong>" + tempPw + "</strong></p>" +
+	        "<p>로그인 후 반드시 비밀번호를 변경해주세요.</p>",
+	        true
+	    );
+
+	    mailSender.send(message);
 	}
 }

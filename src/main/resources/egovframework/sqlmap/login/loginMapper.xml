@@ -43,4 +43,18 @@
 		)
 	</insert>
 	
+	<!-- 아이디 + 이메일로 유저 확인 -->
+	<select id="selectUserByIdAndEmail" parameterType="java.util.Map" resultType="int">
+	    SELECT COUNT(*)
+	    FROM ACC_USER
+	    WHERE USERID = #{USERID}
+	    AND EMAIL = #{EMAIL}
+	</select>
+	
+	<!-- 비밀번호 업데이트 -->
+	<update id="updatePassword" parameterType="java.util.Map">
+	    UPDATE ACC_USER
+	    SET PASSWD = #{PASSWD}
+	    WHERE USERID = #{USERID}
+	</update>
 </mapper>
