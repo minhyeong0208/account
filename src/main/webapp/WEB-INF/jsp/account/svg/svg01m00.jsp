@@ -35,11 +35,11 @@
 			<table id="accTbl">
 				<thead>
 					<tr>
-						<th></th>
-						<th>순번</th>
-						<th>은행명</th>
-						<th>계좌번호</th>
-						<th>초기잔액</th>
+						<th style="text-align: center;"></th>
+						<th style="text-align: center;">순번</th>
+						<th style="text-align: center;">은행명</th>
+						<th style="text-align: center;">계좌번호</th>
+						<th style="text-align: center;">초기잔액</th>
 					</tr>
 				</thead>
 				<tbody id="accTbody"></tbody>
@@ -237,11 +237,11 @@
             let selectedWR = item.BANKNM === "WR" ? "selected" : "";
             
             html += "<tr>"
-            html += "  <td>"
+            html += "  <td style='text-align:center;'>"
             html += "    <input type=\"checkbox\" class=\"chk\">"
             html += "    <input type=\"hidden\" class=\"ACCOUNTID\" name=\"ACCOUNTID[]\" value=\"" + item.ACCOUNTID + "\">"
             html += "  </td>"
-            html += "  <td>" + rowNum + "</td>";
+            html += "  <td style='text-align:center;'>" + rowNum + "</td>";
             html += "  <td>"
             html += "    <select class=\"BANKNM\" name=\"BANKNM[]\">"
             html += "      <option value=\"KM\" " + selectedKM + ">국민</option>"
