@@ -54,7 +54,7 @@ public class UseServiceImpl extends EgovAbstractServiceImpl implements UseServic
 	@SuppressWarnings("unchecked")
 	@Override
 	public void saveHistory(Map<String, Object> inputMap) throws Exception {
-
+		
 	    List<Map<String, Object>> insertList = (List<Map<String, Object>>) inputMap.get("insertList");
 	    List<Map<String, Object>> updateList = (List<Map<String, Object>>) inputMap.get("updateList");
 
@@ -81,7 +81,7 @@ public class UseServiceImpl extends EgovAbstractServiceImpl implements UseServic
 
 	            map.put("USERID", userId);
 	            map.put("MODID", userId);
-
+	            
 	            Long accountId = useDAO.selectAccountId(map);
 	            map.put("ACCOUNTID", accountId);
 

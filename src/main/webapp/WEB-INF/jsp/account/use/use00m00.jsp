@@ -163,6 +163,11 @@
 			let description = $row.find(".DESCRIPTION").val();
 			let tranAmount = $row.find(".TRANAMOUNT").val();
 			
+			// 금액의 콤마 제거 2026.09.09 수정
+			if (tranAmount) {
+			    tranAmount = String(tranAmount).replace(/,/g, "").trim();
+			}
+			
 			if (!accountNum && !tranDate && !tranTime && !description && !tranAmount) return;
 			
 			if(!accountNum.trim() || !tranDate.trim() || !tranTime.trim() || !description.trim() || !tranAmount.trim()) {
@@ -358,8 +363,8 @@
       		html += "  <td style='text-align:center;'><span class='" + tranClass + "'>" + tranText + "</span></td>";
             html += "  <td><input type='text' class='DESCRIPTION' value='" + (item.DESCRIPTION || "") + "'></td>";
             html += "  <td style='text-align:center;'>" + (item.CATEGORYNM || "") + "</td>";
-            html += "  <td><input type='text' class='TRANAMOUNT' value='" + (item.TRANAMOUNT || "") + "'></td>";
-            html += "  <td>" + item.TRANAFTAMOUNT + "</td>";
+            html += "  <td><input type='text' class='TRANAMOUNT' value='" + formatNumber(item.TRANAMOUNT || 0) + "'></td>";
+            html += "  <td style='text-align:right; padding-right:8px;'>" + formatNumber(item.TRANAFTAMOUNT) + "</td>";
             html += "</tr>";
             
             
